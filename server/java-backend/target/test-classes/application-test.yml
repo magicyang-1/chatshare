@@ -1,0 +1,74 @@
+# 测试环境配置
+spring:
+  # 数据源配置 - 使用内存数据库
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+    
+  # JPA配置
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+        
+  # H2控制台配置（可选，用于调试）
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      
+# 日志配置
+logging:
+  level:
+    com.aiplatform: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    
+# 测试特定配置
+test:
+  # 模拟数据配置
+  mock:
+    enabled: true
+    
+# 安全配置（测试环境）
+security:
+  jwt:
+    secret: test-secret-key-for-testing-only
+    expiration: 86400000  # 24小时
+    refresh-expiration: 604800000  # 7天
+    
+# AI配置（测试环境）
+ai:
+  dashscope:
+    api-key: test-api-key
+    model: qwen-turbo
+    max-tokens: 1000
+  local:
+    enabled: false
+    model-path: ./models/
+    max-tokens: 100
+    
+# 文件上传配置（测试环境）
+upload:
+  path: ./uploads/test/
+  max-size: 10MB
+  allowed-types: jpg,jpeg,png,gif
+  
+# 缓存配置（测试环境）
+cache:
+  enabled: false
+  ttl: 300
+  
+# 异步任务配置（测试环境）
+async:
+  enabled: false
+  core-pool-size: 2
+  max-pool-size: 4
+  queue-capacity: 10 

@@ -1,0 +1,8 @@
+node_modules/
+node_modules/.cache/
+server/java-backend/logs/ai-chat-backend.log
+server/java-backend/logs
+server/java-backend/src/test/java/com/aiplatform/repository/
+server/java-backend/src/test/java/com/aiplatform/BaseTest.java
+server/java-backend/uploads/generated/
+server/java-backend/uploads/input/

@@ -1,0 +1,1568 @@
+/* AI模板库主容器 - 优化布局和深色模式支持 */
+.prompt-template-library {
+  position: relative;
+  min-height: 100vh;
+  height: 100vh; /* 固定为视口高度 */
+  background: var(--bg-secondary); /* 使用系统背景色 */
+  padding-top: 0;
+  padding-left: 0;
+  padding-right: 0;
+  padding-bottom: 0;
+  overflow: hidden; /* 禁止整个页面滚动 */
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  z-index: 10; /* 桌面端提高z-index，确保在content-area之上 */
+}
+
+/* 深色模式下的背景调整 */
+.dark-mode .prompt-template-library {
+  background: var(--bg-secondary); /* 使用系统深色背景色 */
+}
+
+/* 头部、搜索栏、分类栏固定宽度和内边距 */
+.template-library-header,
+.template-search-container,
+.template-categories {
+  padding-left: 20px;
+  padding-right: 20px;
+  background: transparent;
+  z-index: 12; /* 桌面端提高z-index，确保在content-area之上 */
+  flex-shrink: 0; /* 防止被压缩 */
+}
+
+/* 模板内容区独立滚动 */
+.template-sections {
+  flex: 1;
+  min-height: 0; /* 关键：允许flex子项收缩 */
+  overflow-y: auto;
+  overflow-x: hidden; /* 防止水平滚动 */
+  padding: 20px 20px 200px 20px; /* 桌面端增加更多底部padding确保可以滚动到底部，避免被content-area遮挡 */
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  z-index: 1;
+  height: 100%; /* 确保有足够的高度 */
+  box-sizing: border-box; /* 确保padding不会影响总高度 */
+  position: relative; /* 确保正确的定位上下文 */
+}
+
+/* 确保template-sections在content-area之上 */
+.prompt-template-library .template-sections {
+  z-index: 15 !important; /* 桌面端提高z-index，确保在content-area之上 */
+}
+
+/* 搜索状态提示样式 */
+.search-status {
+  background: var(--primary-bg);
+  border: 1px solid var(--primary-300);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--primary-600);
+  font-size: 14px;
+}
+
+.dark-mode .search-status {
+  background: var(--primary-bg);
+  border-color: var(--primary-400);
+  color: var(--primary-500);
+}
+
+.search-status button {
+  background: var(--primary-100);
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  color: var(--primary-600);
+  cursor: pointer;
+  font-size: 12px;
+  margin-left: auto;
+  transition: all 0.3s ease;
+}
+
+.dark-mode .search-status button {
+  background: var(--primary-200);
+  color: var(--primary-500);
+}
+
+.search-status button:hover {
+  background: var(--primary-200);
+  transform: translateY(-1px);
+}
+
+.dark-mode .search-status button:hover {
+  background: var(--primary-300);
+}
+
+/* 确保滚动条样式美观 */
+.template-sections::-webkit-scrollbar {
+  width: 8px;
+}
+
+.template-sections::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+}
+
+.template-sections::-webkit-scrollbar-thumb {
+  background: var(--border-secondary);
+  border-radius: 4px;
+}
+
+.template-sections::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+.dark-mode .template-sections::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+}
+
+.dark-mode .template-sections::-webkit-scrollbar-thumb {
+  background: var(--border-secondary);
+}
+
+.dark-mode .template-sections::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* 标题栏 - 调整为非固定位置，放在sidebar下面 */
+.template-library-header {
+  position: relative; /* 改为相对定位 */
+  background: var(--bg-primary);
+  backdrop-filter: blur(15px);
+  border-bottom: 1px solid var(--border-primary);
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease;
+  margin-bottom: 20px;
+  border-radius: 12px;
+  flex-shrink: 0; /* 防止header被压缩 */
+}
+
+.dark-mode .template-library-header {
+  background: var(--bg-primary);
+  border-bottom-color: var(--border-primary);
+  box-shadow: var(--shadow-md);
+}
+
+/* 删除返回按钮样式 */
+/* .back-button 相关样式已删除 */
+
+/* 标题区域优化 */
+.library-title {
+  flex: 1;
+  text-align: center;
+  margin: 0; /* 移除左右边距 */
+}
+
+.library-title h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.dark-mode .library-title h1 {
+  color: var(--text-primary);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.library-title p {
+  margin: 5px 0 0 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.dark-mode .library-title p {
+  color: var(--text-secondary);
+}
+
+/* 操作区域优化 - 只保留创建模板按钮 */
+.library-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* 删除搜索栏样式 */
+/* .search-bar 相关样式已删除 */
+
+/* 创建模板按钮优化 */
+.create-template-btn {
+  background: var(--gradient-primary);
+  color: var(--text-inverse);
+  border: none;
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-md);
+}
+
+.dark-mode .create-template-btn {
+  background: var(--gradient-primary);
+  box-shadow: var(--shadow-md);
+}
+
+.create-template-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.dark-mode .create-template-btn:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+/* 新增：AI模板库内的搜索栏样式 */
+.template-search-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  padding: 0 10px;
+  flex-shrink: 0; /* 防止搜索栏被压缩 */
+}
+
+.template-search-bar {
+  display: flex;
+  align-items: center;
+  background: var(--bg-primary);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: var(--shadow-md);
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  max-width: 500px;
+  width: 100%;
+}
+
+.dark-mode .template-search-bar {
+  background: var(--bg-primary);
+  box-shadow: var(--shadow-md);
+}
+
+.template-search-bar:focus-within {
+  border-color: var(--primary-500);
+  box-shadow: var(--shadow-lg);
+}
+
+.dark-mode .template-search-bar:focus-within {
+  border-color: var(--primary-500);
+  box-shadow: var(--shadow-lg);
+}
+
+.template-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 8px 12px;
+  font-size: 14px;
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.dark-mode .template-search-input {
+  color: var(--text-primary);
+}
+
+.template-search-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.dark-mode .template-search-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.template-search-btn {
+  background: var(--primary-500);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dark-mode .template-search-btn {
+  background: var(--primary-500);
+}
+
+.template-search-btn:hover {
+  background: var(--primary-600);
+  transform: translateY(-1px);
+}
+
+/* 分类栏样式 */
+.template-categories {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 15px 20px;
+  background: var(--bg-primary);
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+}
+
+.category-btn {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 20px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.dark-mode .category-btn {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border-color: var(--border-primary);
+}
+
+.category-btn:hover {
+  background: var(--bg-hover);
+  color: var(--primary-600);
+  border-color: var(--primary-300);
+}
+
+.dark-mode .category-btn:hover {
+  background: var(--bg-hover);
+  color: var(--primary-500);
+  border-color: var(--primary-400);
+}
+
+.category-btn.active {
+  background: var(--primary-500);
+  color: var(--text-inverse);
+  border-color: var(--primary-500);
+}
+
+.dark-mode .category-btn.active {
+  background: var(--primary-500);
+  color: var(--text-inverse);
+  border-color: var(--primary-500);
+}
+
+/* 模板区域标题 */
+.template-section h3 {
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dark-mode .template-section h3 {
+  color: var(--text-primary);
+}
+
+/* 模板网格布局 */
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+/* 模板卡片样式 */
+.template-card {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.dark-mode .template-card {
+  background: var(--bg-primary);
+  border-color: var(--border-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.template-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--gradient-primary);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.dark-mode .template-card::before {
+  background: var(--gradient-primary);
+}
+
+.template-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.dark-mode .template-card:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.template-card:hover::before {
+  opacity: 1;
+}
+
+/* 模板头部 */
+.template-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.template-header h4 {
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  flex: 1;
+  line-height: 1.4;
+}
+
+.dark-mode .template-header h4 {
+  color: var(--text-primary);
+}
+
+/* 官方/用户标签 */
+.official-badge {
+  background: var(--success);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+.user-badge {
+  background: var(--info);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+/* 模板描述 */
+.template-description {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 15px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.dark-mode .template-description {
+  color: var(--text-secondary);
+}
+
+/* 模板元信息 */
+.template-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.category-tag {
+  background: var(--primary-100);
+  color: var(--primary-700);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.dark-mode .category-tag {
+  background: var(--primary-200);
+  color: var(--primary-600);
+}
+
+.model-tag {
+  background: var(--info-bg);
+  color: var(--info);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.dark-mode .model-tag {
+  background: var(--info-bg);
+  color: var(--info);
+}
+
+/* 模板统计信息 */
+.template-stats {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  color: var(--text-tertiary);
+  font-size: 12px;
+  margin-bottom: 15px;
+}
+
+.dark-mode .template-stats {
+  color: var(--text-tertiary);
+}
+
+.template-stats .liked {
+  color: var(--error);
+}
+
+/* 模板操作按钮 */
+.template-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.template-actions button {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dark-mode .template-actions button {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border-color: var(--border-primary);
+}
+
+.template-actions button:hover {
+  background: var(--bg-hover);
+  color: var(--primary-600);
+  border-color: var(--primary-300);
+}
+
+.dark-mode .template-actions button:hover {
+  background: var(--bg-hover);
+  color: var(--primary-500);
+  border-color: var(--primary-400);
+}
+
+/* 点赞按钮样式优化 */
+.like-btn {
+  background: var(--bg-secondary);
+  color: var(--text-tertiary);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: scale(1);
+}
+
+.dark-mode .like-btn {
+  background: var(--bg-secondary);
+  color: var(--text-tertiary);
+}
+
+.like-btn:hover {
+  color: var(--error);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.dark-mode .like-btn:hover {
+  color: var(--error);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.like-btn.liked {
+  color: var(--error);
+  background: rgba(239, 68, 68, 0.1);
+  border-color: var(--error);
+  animation: likePulse 0.6s ease-out;
+}
+
+.dark-mode .like-btn.liked {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: var(--error);
+}
+
+/* 点赞动画效果 */
+@keyframes likePulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* 点赞按钮点击效果 */
+.like-btn:active {
+  transform: scale(0.95);
+  transition: transform 0.1s ease;
+}
+
+/* 点赞按钮加载状态 */
+.like-btn.loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.like-btn.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* 点赞统计数字动画 */
+.template-stats .liked {
+  color: var(--error);
+  animation: numberPulse 0.6s ease-out;
+}
+
+@keyframes numberPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* 点赞按钮图标动画 */
+.like-btn svg {
+  transition: transform 0.3s ease;
+}
+
+.like-btn:hover svg {
+  transform: scale(1.1);
+}
+
+.like-btn.liked svg {
+  animation: heartBeat 0.6s ease-out;
+}
+
+@keyframes heartBeat {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.3);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  75% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.view-btn {
+  background: var(--primary-100);
+  color: var(--primary-700);
+}
+
+.dark-mode .view-btn {
+  background: var(--primary-200);
+  color: var(--primary-600);
+}
+
+.view-btn:hover {
+  background: var(--primary-200);
+  color: var(--primary-800);
+}
+
+.dark-mode .view-btn:hover {
+  background: var(--primary-300);
+  color: var(--primary-700);
+}
+
+.use-btn {
+  background: var(--primary-500);
+  color: var(--text-inverse);
+  border-color: var(--primary-500);
+}
+
+.dark-mode .use-btn {
+  background: var(--primary-500);
+  color: var(--text-inverse);
+  border-color: var(--primary-500);
+}
+
+.use-btn:hover {
+  background: var(--primary-600);
+  border-color: var(--primary-600);
+}
+
+.dark-mode .use-btn:hover {
+  background: var(--primary-600);
+  border-color: var(--primary-600);
+}
+
+.delete-btn {
+  background: var(--error-bg);
+  color: var(--error);
+  border-color: var(--error);
+}
+
+.dark-mode .delete-btn {
+  background: var(--error-bg);
+  color: var(--error);
+  border-color: var(--error);
+}
+
+.delete-btn:hover {
+  background: var(--error);
+  color: var(--text-inverse);
+}
+
+/* 模板详情模态框 */
+.template-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.dark-mode .template-modal-overlay {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.template-modal {
+  background: var(--bg-primary);
+  border-radius: 16px;
+  padding: 30px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: var(--shadow-xl);
+}
+
+.dark-mode .template-modal {
+  background: var(--bg-primary);
+  box-shadow: var(--shadow-xl);
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: var(--bg-secondary);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+}
+
+.dark-mode .modal-close-btn {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+.modal-close-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.dark-mode .modal-close-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.modal-template-content {
+  margin-top: 20px;
+}
+
+.modal-template-title {
+  color: var(--text-primary);
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.dark-mode .modal-template-title {
+  color: var(--text-primary);
+}
+
+.modal-template-meta {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.modal-template-description {
+  color: var(--text-secondary);
+  margin-bottom: 25px;
+  line-height: 1.6;
+}
+
+.dark-mode .modal-template-description {
+  color: var(--text-secondary);
+}
+
+.modal-template-prompt {
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 25px;
+}
+
+.dark-mode .modal-template-prompt {
+  background: var(--bg-secondary);
+}
+
+.modal-template-prompt h4 {
+  color: var(--text-primary);
+  margin-bottom: 10px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.dark-mode .modal-template-prompt h4 {
+  color: var(--text-primary);
+}
+
+.modal-template-prompt pre {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  padding: 15px;
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-x: auto;
+}
+
+.dark-mode .modal-template-prompt pre {
+  background: var(--bg-primary);
+  border-color: var(--border-primary);
+  color: var(--text-primary);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+/* 创建模板模态框 */
+.create-template-modal {
+  background: var(--bg-primary);
+  border-radius: 16px;
+  padding: 30px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-xl);
+}
+
+.dark-mode .create-template-modal {
+  background: var(--bg-primary);
+  box-shadow: var(--shadow-xl);
+}
+
+.create-template-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.dark-mode .form-group label {
+  color: var(--text-primary);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 12px;
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.dark-mode .form-group input,
+.dark-mode .form-group select,
+.dark-mode .form-group textarea {
+  background: var(--bg-primary);
+  border-color: var(--border-primary);
+  color: var(--text-primary);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.dark-mode .form-group input:focus,
+.dark-mode .form-group select:focus,
+.dark-mode .form-group textarea:focus {
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.cancel-btn {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dark-mode .cancel-btn {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border-color: var(--border-primary);
+}
+
+.cancel-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.dark-mode .cancel-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.submit-btn {
+  background: var(--gradient-primary);
+  color: var(--text-inverse);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.dark-mode .submit-btn {
+  background: var(--gradient-primary);
+  color: var(--text-inverse);
+}
+
+.submit-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.dark-mode .submit-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* 加载状态 */
+.loading-templates {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  color: var(--text-secondary);
+  font-size: 16px;
+}
+
+.dark-mode .loading-templates {
+  color: var(--text-secondary);
+}
+
+.loading-templates::before {
+  content: '';
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-primary);
+  border-top: 2px solid var(--primary-500);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 12px;
+}
+
+.dark-mode .loading-templates::before {
+  border-color: var(--border-primary);
+  border-top-color: var(--primary-500);
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 空状态 */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-secondary);
+}
+
+.dark-mode .empty-state {
+  color: var(--text-secondary);
+}
+
+.empty-state svg {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 20px;
+  opacity: 0.5;
+}
+
+.empty-state h4 {
+  color: var(--text-primary);
+  font-size: 18px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.dark-mode .empty-state h4 {
+  color: var(--text-primary);
+}
+
+.empty-state p {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* 分页样式 */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 30px;
+  padding: 20px 0;
+}
+
+.pagination-btn {
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.dark-mode .pagination-btn {
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  border-color: var(--border-primary);
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--primary-600);
+  border-color: var(--primary-300);
+}
+
+.dark-mode .pagination-btn:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--primary-500);
+  border-color: var(--primary-400);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-numbers {
+  display: flex;
+  gap: 4px;
+}
+
+.pagination-number {
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  min-width: 40px;
+  text-align: center;
+}
+
+.dark-mode .pagination-number {
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  border-color: var(--border-primary);
+}
+
+.pagination-number:hover {
+  background: var(--bg-hover);
+  color: var(--primary-600);
+  border-color: var(--primary-300);
+}
+
+.dark-mode .pagination-number:hover {
+  background: var(--bg-hover);
+  color: var(--primary-500);
+  border-color: var(--primary-400);
+}
+
+.pagination-number.active {
+  background: var(--primary-500);
+  color: var(--text-inverse);
+  border-color: var(--primary-500);
+}
+
+.dark-mode .pagination-number.active {
+  background: var(--primary-500);
+  color: var(--text-inverse);
+  border-color: var(--primary-500);
+}
+
+.pagination-info {
+  color: var(--text-tertiary);
+  font-size: 14px;
+  margin-left: 20px;
+}
+
+.dark-mode .pagination-info {
+  color: var(--text-tertiary);
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .prompt-template-library {
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .template-library-header,
+  .template-search-container,
+  .template-categories {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+
+  .template-sections {
+    padding: 15px 15px 100px 15px; /* 移动端也增加底部padding */
+  }
+
+  .template-library-header {
+    padding: 12px 15px;
+    margin-bottom: 15px;
+  }
+
+  .library-title {
+    text-align: left;
+  }
+
+  .library-title h1 {
+    font-size: 20px;
+  }
+
+  .library-actions {
+    gap: 10px;
+  }
+
+  .create-template-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .template-search-container {
+    margin-bottom: 15px;
+  }
+
+  .template-search-bar {
+    max-width: none;
+  }
+
+  .template-categories {
+    padding: 12px 15px;
+    margin-bottom: 15px;
+  }
+
+  .category-btn {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  .template-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .template-card {
+    padding: 15px;
+  }
+
+  .template-header h4 {
+    font-size: 15px;
+  }
+
+  .template-actions {
+    gap: 6px;
+  }
+
+  .template-actions button {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+
+  .pagination {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .pagination-btn {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+
+  .pagination-numbers {
+    gap: 3px;
+  }
+
+  .pagination-number {
+    padding: 6px 10px;
+    font-size: 13px;
+    min-width: 36px;
+  }
+
+  .pagination-info {
+    margin-left: 15px;
+    font-size: 13px;
+  }
+
+  .template-modal,
+  .create-template-modal {
+    width: 95%;
+    padding: 20px;
+    max-height: 90vh;
+  }
+
+  .modal-template-title {
+    font-size: 20px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .cancel-btn,
+  .submit-btn {
+    width: 100%;
+    padding: 12px;
+  }
+}
+
+/* 大屏幕优化 */
+@media (min-width: 1200px) {
+  .template-grid {
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  }
+}
+
+/* 桌面端特定优化 - 确保template-sections不被content-area遮挡 */
+@media (min-width: 769px) {
+  /* 桌面端AI模板库整体优化 */
+  .prompt-template-library {
+    z-index: 20 !important; /* 桌面端更高的z-index */
+  }
+
+  .prompt-template-library .template-sections {
+    z-index: 25 !important; /* 桌面端更高的z-index */
+    padding-bottom: 300px !important; /* 桌面端增加更多底部空间，确保template-card完整显示 */
+  }
+
+  .template-library-header,
+  .template-search-container,
+  .template-categories {
+    z-index: 22 !important; /* 桌面端更高的z-index */
+  }
+
+  .template-card {
+    z-index: 1; /* 确保卡片在滚动区域内正确定位 */
+  }
+  
+  /* 确保分页区域完全可见 */
+  .pagination {
+    margin-bottom: 60px !important; /* 桌面端增加更多底部边距 */
+    z-index: 1; /* 确保分页在滚动区域内正确定位 */
+  }
+}
+
+/* 深色模式滚动条 */
+.dark-mode ::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dark-mode ::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+}
+
+.dark-mode ::-webkit-scrollbar-thumb {
+  background: var(--border-secondary);
+}
+
+.dark-mode ::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* 确保深色模式下的所有元素都使用正确的颜色 */
+.prompt-template-library {
+  background: var(--bg-secondary);
+}
+
+.dark-mode .prompt-template-library {
+  background: var(--bg-secondary);
+}
+
+.dark-mode .template-card {
+  background: var(--bg-primary);
+}
+
+.dark-mode .template-card .template-description {
+  color: var(--text-secondary);
+}
+
+.dark-mode .template-card .template-stats {
+  color: var(--text-tertiary);
+}
+
+.dark-mode .template-modal,
+.dark-mode .create-template-modal {
+  background: var(--bg-primary);
+}
+
+.dark-mode .modal-template-content {
+  color: var(--text-primary);
+}
+
+.dark-mode .form-group input,
+.dark-mode .form-group select,
+.dark-mode .form-group textarea {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.dark-mode .form-group input::placeholder,
+.dark-mode .form-group textarea::placeholder {
+  color: var(--text-tertiary);
+}
+
+.dark-mode .template-actions button {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+.dark-mode .template-actions button:hover {
+  background: var(--bg-hover);
+  color: var(--primary-500);
+}
+
+.dark-mode .pagination {
+  color: var(--text-secondary);
+}
+
+.dark-mode .empty-state {
+  color: var(--text-secondary);
+}
+
+.dark-mode .empty-state h4 {
+  color: var(--text-primary);
+}
+
+.dark-mode .loading-templates {
+  color: var(--text-secondary);
+}
+
+.dark-mode .category-btn {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+.dark-mode .category-btn:hover {
+  background: var(--bg-hover);
+  color: var(--primary-500);
+}
+
+.dark-mode .template-search-input {
+  color: var(--text-primary);
+}
+
+.dark-mode .template-search-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.dark-mode .library-title h1 {
+  color: var(--text-primary);
+}
+
+.dark-mode .library-title p {
+  color: var(--text-secondary);
+}
+
+.dark-mode .official-badge,
+.dark-mode .user-badge {
+  color: var(--text-inverse);
+}
+
+.dark-mode .category-tag,
+.dark-mode .model-tag {
+  color: var(--text-primary);
+}
+
+.dark-mode .template-stats span {
+  color: var(--text-tertiary);
+}
+
+.dark-mode .template-stats .liked {
+  color: var(--error);
+}
+
+.dark-mode .modal-actions button {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+.dark-mode .form-group label {
+  color: var(--text-primary);
+}
+
+.dark-mode .modal-close-btn {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+.dark-mode .modal-close-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.dark-mode .pagination-info {
+  color: var(--text-tertiary);
+}
+
+.dark-mode .pagination-number {
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+}
+
+.dark-mode .pagination-number:hover {
+  background: var(--bg-hover);
+  color: var(--primary-500);
+}
+
+.dark-mode .pagination-number.active {
+  background: var(--primary-500);
+  color: var(--text-inverse);
+}
+
+.dark-mode .pagination-btn {
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+}
+
+.dark-mode .pagination-btn:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--primary-500);
+}
+
+.dark-mode .pagination-btn:disabled {
+  opacity: 0.5;
+} 
