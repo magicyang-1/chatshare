@@ -1,0 +1,156 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > PromptTemplateRepository</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.aiplatform.repository</a>
+</div>
+
+<h1>Coverage Summary for Class: PromptTemplateRepository (com.aiplatform.repository)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">PromptTemplateRepository$MockitoMock$0cuDi7DD</td>
+  </tr>
+  <tr>
+    <td class="name">PromptTemplateRepository$MockitoMock$0cuDi7DD$auxiliary$6gLX42RB</td>
+  </tr>
+  <tr>
+    <td class="name">PromptTemplateRepository$MockitoMock$0cuDi7DD$auxiliary$LEIeDCCE</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.aiplatform.repository;
+&nbsp;
+&nbsp;import com.aiplatform.entity.PromptTemplate;
+&nbsp;import org.springframework.data.domain.Page;
+&nbsp;import org.springframework.data.domain.Pageable;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.data.jpa.repository.Query;
+&nbsp;import org.springframework.data.repository.query.Param;
+&nbsp;import org.springframework.stereotype.Repository;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@Repository
+&nbsp;public interface PromptTemplateRepository extends JpaRepository&lt;PromptTemplate, Long&gt; {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 根据分类查找公开的模板
+&nbsp;     */
+&nbsp;    Page&lt;PromptTemplate&gt; findByCategoryIdAndIsPublicTrueOrderByIsFeaturedDescUsageCountDescCreatedAtDesc(
+&nbsp;            Long categoryId, Pageable pageable);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 查找所有公开的模板
+&nbsp;     */
+&nbsp;    Page&lt;PromptTemplate&gt; findByIsPublicTrueOrderByIsFeaturedDescUsageCountDescCreatedAtDesc(Pageable pageable);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 查找精选模板
+&nbsp;     */
+&nbsp;    List&lt;PromptTemplate&gt; findByIsFeaturedTrueAndIsPublicTrueOrderByUsageCountDescCreatedAtDesc();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 查找官方模板
+&nbsp;     */
+&nbsp;    Page&lt;PromptTemplate&gt; findByTemplateTypeAndIsPublicTrueOrderByUsageCountDescCreatedAtDesc(
+&nbsp;            PromptTemplate.TemplateType templateType, Pageable pageable);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 根据用户ID查找模板
+&nbsp;     */
+&nbsp;    Page&lt;PromptTemplate&gt; findByCreatorIdOrderByCreatedAtDesc(Long creatorId, Pageable pageable);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 搜索模板（标题、描述、标签）
+&nbsp;     */
+&nbsp;    @Query(&quot;SELECT pt FROM PromptTemplate pt WHERE pt.isPublic = true AND &quot; +
+&nbsp;           &quot;(LOWER(pt.title) LIKE LOWER(CONCAT(&#39;%&#39;, :keyword, &#39;%&#39;)) OR &quot; +
+&nbsp;           &quot;LOWER(pt.description) LIKE LOWER(CONCAT(&#39;%&#39;, :keyword, &#39;%&#39;)) OR &quot; +
+&nbsp;           &quot;LOWER(pt.tags) LIKE LOWER(CONCAT(&#39;%&#39;, :keyword, &#39;%&#39;))) &quot; +
+&nbsp;           &quot;ORDER BY pt.isFeatured DESC, pt.usageCount DESC, pt.createdAt DESC&quot;)
+&nbsp;    Page&lt;PromptTemplate&gt; searchTemplates(@Param(&quot;keyword&quot;) String keyword, Pageable pageable);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 根据分类和关键词搜索
+&nbsp;     */
+&nbsp;    @Query(&quot;SELECT pt FROM PromptTemplate pt WHERE pt.categoryId = :categoryId AND pt.isPublic = true AND &quot; +
+&nbsp;           &quot;(LOWER(pt.title) LIKE LOWER(CONCAT(&#39;%&#39;, :keyword, &#39;%&#39;)) OR &quot; +
+&nbsp;           &quot;LOWER(pt.description) LIKE LOWER(CONCAT(&#39;%&#39;, :keyword, &#39;%&#39;)) OR &quot; +
+&nbsp;           &quot;LOWER(pt.tags) LIKE LOWER(CONCAT(&#39;%&#39;, :keyword, &#39;%&#39;))) &quot; +
+&nbsp;           &quot;ORDER BY pt.isFeatured DESC, pt.usageCount DESC, pt.createdAt DESC&quot;)
+&nbsp;    Page&lt;PromptTemplate&gt; searchTemplatesByCategory(@Param(&quot;categoryId&quot;) Long categoryId, 
+&nbsp;                                                   @Param(&quot;keyword&quot;) String keyword, 
+&nbsp;                                                   Pageable pageable);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 获取热门模板（按使用次数排序）
+&nbsp;     */
+&nbsp;    List&lt;PromptTemplate&gt; findTop10ByIsPublicTrueOrderByUsageCountDesc();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 获取最新模板
+&nbsp;     */
+&nbsp;    List&lt;PromptTemplate&gt; findTop10ByIsPublicTrueOrderByCreatedAtDesc();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 根据AI模型推荐模板
+&nbsp;     */
+&nbsp;    List&lt;PromptTemplate&gt; findByAiModelAndIsPublicTrueOrderByUsageCountDescCreatedAtDesc(String aiModel);
+&nbsp;} 
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-07-18 23:35</div>
+</div>
+</body>
+</html>

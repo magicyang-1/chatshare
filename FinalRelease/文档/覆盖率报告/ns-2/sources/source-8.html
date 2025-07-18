@@ -1,0 +1,366 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > ImageGenerationController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.aiplatform.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: ImageGenerationController (com.aiplatform.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ImageGenerationController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    72.7%
+  </span>
+  <span class="absValue">
+    (16/22)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    84.5%
+  </span>
+  <span class="absValue">
+    (82/97)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.aiplatform.controller;
+&nbsp;
+&nbsp;import com.aiplatform.entity.Chat;
+&nbsp;import com.aiplatform.entity.Message;
+&nbsp;import com.aiplatform.entity.MessageAttachment;
+&nbsp;import com.aiplatform.entity.User;
+&nbsp;import com.aiplatform.service.ChatService;
+&nbsp;import com.aiplatform.service.DashScopeImageService;
+&nbsp;import com.aiplatform.service.MessageService;
+&nbsp;import com.aiplatform.service.UserService;
+&nbsp;import com.aiplatform.security.JwtTokenProvider;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;@RestController
+&nbsp;@RequestMapping(&quot;/image&quot;)
+<b class="fc">&nbsp;@RequiredArgsConstructor</b>
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;public class ImageGenerationController {
+&nbsp;
+&nbsp;    private final DashScopeImageService dashScopeImageService;
+&nbsp;    private final MessageService messageService;
+&nbsp;    private final ChatService chatService;
+&nbsp;    private final UserService userService;
+&nbsp;    private final JwtTokenProvider jwtTokenProvider;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 文生图接口
+&nbsp;     */
+&nbsp;    @PostMapping(&quot;/text-to-image&quot;)
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; generateTextToImage(
+&nbsp;            @RequestHeader(&quot;Authorization&quot;) String authHeader,
+&nbsp;            @RequestBody Map&lt;String, Object&gt; request) {
+&nbsp;        
+&nbsp;        try {
+&nbsp;            // 验证token
+<b class="fc">&nbsp;            String token = authHeader.substring(7);</b>
+<b class="fc">&nbsp;            String username = jwtTokenProvider.getEmailFromToken(token);</b>
+&nbsp;            
+&nbsp;            // 获取参数
+<b class="fc">&nbsp;            String prompt = (String) request.get(&quot;prompt&quot;);</b>
+<b class="fc">&nbsp;            String size = (String) request.get(&quot;size&quot;);</b>
+<b class="fc">&nbsp;            String style = (String) request.get(&quot;style&quot;);</b>
+<b class="fc">&nbsp;            Long chatId = Long.valueOf(request.get(&quot;chatId&quot;).toString());</b>
+&nbsp;            
+<b class="pc">&nbsp;            if (prompt == null || prompt.trim().isEmpty()) {</b>
+<b class="fc">&nbsp;                return ResponseEntity.badRequest().body(</b>
+<b class="fc">&nbsp;                    Map.of(&quot;error&quot;, &quot;提示词不能为空&quot;)</b>
+&nbsp;                );
+&nbsp;            }
+&nbsp;            
+&nbsp;            // 检查DashScope服务是否可用
+<b class="fc">&nbsp;            if (!dashScopeImageService.isAvailable()) {</b>
+<b class="fc">&nbsp;                return ResponseEntity.badRequest().body(</b>
+<b class="fc">&nbsp;                    Map.of(&quot;error&quot;, &quot;图像生成服务不可用&quot;)</b>
+&nbsp;                );
+&nbsp;            }
+&nbsp;            
+&nbsp;            // 获取或创建聊天
+&nbsp;            Chat chat;
+&nbsp;            try {
+<b class="fc">&nbsp;                chat = chatService.getChatById(chatId);</b>
+&nbsp;            } catch (Exception e) {
+&nbsp;                // 如果聊天会话不存在，创建一个新的图像生成会话
+<b class="fc">&nbsp;                User user = userService.findByEmail(username)</b>
+<b class="fc">&nbsp;                    .orElseThrow(() -&gt; new RuntimeException(&quot;用户不存在&quot;));</b>
+<b class="fc">&nbsp;                chat = chatService.createChat(user.getId(), &quot;智能生图&quot;, Chat.AiType.text_to_image);</b>
+<b class="fc">&nbsp;                log.info(&quot;为用户 {} 创建新的图像生成聊天会话: {}&quot;, username, chat.getId());</b>
+&nbsp;            }
+&nbsp;            
+&nbsp;            // 创建消息
+<b class="fc">&nbsp;            Message message = new Message();</b>
+<b class="fc">&nbsp;            message.setChatId(chat.getId());</b>
+<b class="fc">&nbsp;            message.setContent(&quot;【图像生成】&quot; + prompt);</b>
+<b class="fc">&nbsp;            message.setRole(Message.MessageRole.user);</b>
+<b class="fc">&nbsp;            message = messageService.saveMessage(message);</b>
+&nbsp;            
+&nbsp;            // 生成图片
+<b class="fc">&nbsp;            MessageAttachment attachment = dashScopeImageService.generateTextToImage(</b>
+&nbsp;                prompt, size, style, message
+&nbsp;            );
+&nbsp;            
+<b class="fc">&nbsp;            if (attachment != null) {</b>
+<b class="fc">&nbsp;                Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;                response.put(&quot;success&quot;, true);</b>
+<b class="fc">&nbsp;                response.put(&quot;message&quot;, &quot;图片生成成功&quot;);</b>
+<b class="fc">&nbsp;                response.put(&quot;imageUrl&quot;, &quot;http://localhost:8080/api/files/&quot; + attachment.getFileName());</b>
+<b class="fc">&nbsp;                response.put(&quot;messageId&quot;, message.getId());</b>
+<b class="fc">&nbsp;                response.put(&quot;attachmentId&quot;, attachment.getId());</b>
+&nbsp;                
+<b class="fc">&nbsp;                return ResponseEntity.ok(response);</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                return ResponseEntity.badRequest().body(</b>
+<b class="fc">&nbsp;                    Map.of(&quot;error&quot;, &quot;图片生成失败&quot;)</b>
+&nbsp;                );
+&nbsp;            }
+&nbsp;            
+&nbsp;        } catch (Exception e) {
+<b class="fc">&nbsp;            log.error(&quot;文生图失败&quot;, e);</b>
+<b class="fc">&nbsp;            return ResponseEntity.badRequest().body(</b>
+<b class="fc">&nbsp;                Map.of(&quot;error&quot;, &quot;图片生成失败: &quot; + e.getMessage())</b>
+&nbsp;            );
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 图生图接口
+&nbsp;     */
+&nbsp;    @PostMapping(&quot;/image-to-image&quot;)
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; generateImageToImage(
+&nbsp;            @RequestHeader(&quot;Authorization&quot;) String authHeader,
+&nbsp;            @RequestBody Map&lt;String, Object&gt; request) {
+&nbsp;        
+&nbsp;        try {
+&nbsp;            // 验证token
+<b class="fc">&nbsp;            String token = authHeader.substring(7);</b>
+<b class="fc">&nbsp;            String username = jwtTokenProvider.getEmailFromToken(token);</b>
+&nbsp;            
+&nbsp;            // 获取参数
+<b class="fc">&nbsp;            String prompt = (String) request.get(&quot;prompt&quot;);</b>
+<b class="fc">&nbsp;            String referenceImageUrl = (String) request.get(&quot;referenceImageUrl&quot;);</b>
+<b class="fc">&nbsp;            String size = (String) request.get(&quot;size&quot;);</b>
+<b class="fc">&nbsp;            String style = (String) request.get(&quot;style&quot;);</b>
+<b class="fc">&nbsp;            Long chatId = Long.valueOf(request.get(&quot;chatId&quot;).toString());</b>
+&nbsp;            
+<b class="pc">&nbsp;            if (prompt == null || prompt.trim().isEmpty()) {</b>
+<b class="nc">&nbsp;                return ResponseEntity.badRequest().body(</b>
+<b class="nc">&nbsp;                    Map.of(&quot;error&quot;, &quot;提示词不能为空&quot;)</b>
+&nbsp;                );
+&nbsp;            }
+&nbsp;            
+<b class="pc">&nbsp;            if (referenceImageUrl == null || referenceImageUrl.trim().isEmpty()) {</b>
+<b class="fc">&nbsp;                return ResponseEntity.badRequest().body(</b>
+<b class="fc">&nbsp;                    Map.of(&quot;error&quot;, &quot;参考图片不能为空&quot;)</b>
+&nbsp;                );
+&nbsp;            }
+&nbsp;            
+&nbsp;            // 检查DashScope服务是否可用
+<b class="pc">&nbsp;            if (!dashScopeImageService.isAvailable()) {</b>
+<b class="nc">&nbsp;                return ResponseEntity.badRequest().body(</b>
+<b class="nc">&nbsp;                    Map.of(&quot;error&quot;, &quot;图像生成服务不可用&quot;)</b>
+&nbsp;                );
+&nbsp;            }
+&nbsp;            
+&nbsp;            // 获取或创建聊天
+&nbsp;            Chat chat;
+&nbsp;            try {
+<b class="fc">&nbsp;                chat = chatService.getChatById(chatId);</b>
+&nbsp;            } catch (Exception e) {
+&nbsp;                // 如果聊天会话不存在，创建一个新的图像生成会话
+<b class="fc">&nbsp;                User user = userService.findByEmail(username)</b>
+<b class="fc">&nbsp;                    .orElseThrow(() -&gt; new RuntimeException(&quot;用户不存在&quot;));</b>
+<b class="fc">&nbsp;                chat = chatService.createChat(user.getId(), &quot;智能生图&quot;, Chat.AiType.image_to_image);</b>
+<b class="fc">&nbsp;                log.info(&quot;为用户 {} 创建新的图像生成聊天会话: {}&quot;, username, chat.getId());</b>
+&nbsp;            }
+&nbsp;            
+&nbsp;            // 创建消息
+<b class="fc">&nbsp;            Message message = new Message();</b>
+<b class="fc">&nbsp;            message.setChatId(chat.getId());</b>
+<b class="fc">&nbsp;            message.setContent(&quot;【图生图】&quot; + prompt);</b>
+<b class="fc">&nbsp;            message.setRole(Message.MessageRole.user);</b>
+<b class="fc">&nbsp;            message = messageService.saveMessage(message);</b>
+&nbsp;            
+&nbsp;            // 生成图片
+<b class="fc">&nbsp;            MessageAttachment attachment = dashScopeImageService.generateImageToImage(</b>
+&nbsp;                prompt, referenceImageUrl, size, style, message
+&nbsp;            );
+&nbsp;            
+<b class="pc">&nbsp;            if (attachment != null) {</b>
+<b class="fc">&nbsp;                Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;                response.put(&quot;success&quot;, true);</b>
+<b class="fc">&nbsp;                response.put(&quot;message&quot;, &quot;图片生成成功&quot;);</b>
+<b class="fc">&nbsp;                response.put(&quot;imageUrl&quot;, &quot;http://localhost:8080/api/files/&quot; + attachment.getFileName());</b>
+<b class="fc">&nbsp;                response.put(&quot;messageId&quot;, message.getId());</b>
+<b class="fc">&nbsp;                response.put(&quot;attachmentId&quot;, attachment.getId());</b>
+&nbsp;                
+<b class="fc">&nbsp;                return ResponseEntity.ok(response);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                return ResponseEntity.badRequest().body(</b>
+<b class="nc">&nbsp;                    Map.of(&quot;error&quot;, &quot;图片生成失败&quot;)</b>
+&nbsp;                );
+&nbsp;            }
+&nbsp;            
+&nbsp;        } catch (Exception e) {
+<b class="fc">&nbsp;            log.error(&quot;图生图失败&quot;, e);</b>
+<b class="fc">&nbsp;            return ResponseEntity.badRequest().body(</b>
+<b class="fc">&nbsp;                Map.of(&quot;error&quot;, &quot;图片生成失败: &quot; + e.getMessage())</b>
+&nbsp;            );
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 获取支持的图片尺寸
+&nbsp;     */
+&nbsp;    @GetMapping(&quot;/supported-sizes&quot;)
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; getSupportedSizes() {
+&nbsp;        try {
+<b class="fc">&nbsp;            List&lt;String&gt; sizes = dashScopeImageService.getSupportedSizes();</b>
+<b class="fc">&nbsp;            return ResponseEntity.ok(Map.of(&quot;sizes&quot;, sizes));</b>
+&nbsp;        } catch (Exception e) {
+<b class="nc">&nbsp;            log.error(&quot;获取支持的尺寸失败&quot;, e);</b>
+<b class="nc">&nbsp;            return ResponseEntity.badRequest().body(</b>
+<b class="nc">&nbsp;                Map.of(&quot;error&quot;, &quot;获取支持的尺寸失败: &quot; + e.getMessage())</b>
+&nbsp;            );
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 获取支持的风格
+&nbsp;     */
+&nbsp;    @GetMapping(&quot;/supported-styles&quot;)
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; getSupportedStyles() {
+&nbsp;        try {
+<b class="fc">&nbsp;            List&lt;String&gt; styles = dashScopeImageService.getSupportedStyles();</b>
+<b class="fc">&nbsp;            return ResponseEntity.ok(Map.of(&quot;styles&quot;, styles));</b>
+&nbsp;        } catch (Exception e) {
+<b class="nc">&nbsp;            log.error(&quot;获取支持的风格失败&quot;, e);</b>
+<b class="nc">&nbsp;            return ResponseEntity.badRequest().body(</b>
+<b class="nc">&nbsp;                Map.of(&quot;error&quot;, &quot;获取支持的风格失败: &quot; + e.getMessage())</b>
+&nbsp;            );
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 检查服务状态
+&nbsp;     */
+&nbsp;    @GetMapping(&quot;/status&quot;)
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; getStatus() {
+&nbsp;        try {
+<b class="fc">&nbsp;            boolean available = dashScopeImageService.isAvailable();</b>
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; status = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            status.put(&quot;available&quot;, available);</b>
+<b class="fc">&nbsp;            status.put(&quot;service&quot;, &quot;DashScope&quot;);</b>
+<b class="fc">&nbsp;            status.put(&quot;message&quot;, available ? &quot;服务可用&quot; : &quot;服务不可用&quot;);</b>
+&nbsp;            
+<b class="fc">&nbsp;            return ResponseEntity.ok(status);</b>
+&nbsp;        } catch (Exception e) {
+<b class="nc">&nbsp;            log.error(&quot;检查服务状态失败&quot;, e);</b>
+<b class="nc">&nbsp;            return ResponseEntity.badRequest().body(</b>
+<b class="nc">&nbsp;                Map.of(&quot;error&quot;, &quot;检查服务状态失败: &quot; + e.getMessage())</b>
+&nbsp;            );
+&nbsp;        }
+&nbsp;    }
+&nbsp;} 
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-07-18 23:35</div>
+</div>
+</body>
+</html>

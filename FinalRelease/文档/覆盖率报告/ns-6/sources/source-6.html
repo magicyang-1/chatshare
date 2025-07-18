@@ -1,0 +1,128 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > SupportChatRepository</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.aiplatform.repository</a>
+</div>
+
+<h1>Coverage Summary for Class: SupportChatRepository (com.aiplatform.repository)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">SupportChatRepository$MockitoMock$nhwcojRg</td>
+  </tr>
+  <tr>
+    <td class="name">SupportChatRepository$MockitoMock$nhwcojRg$auxiliary$d9ArPwJz</td>
+  </tr>
+  <tr>
+    <td class="name">SupportChatRepository$MockitoMock$nhwcojRg$auxiliary$XnExrYIY</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.aiplatform.repository;
+&nbsp;
+&nbsp;import com.aiplatform.entity.SupportChat;
+&nbsp;import org.springframework.data.domain.Page;
+&nbsp;import org.springframework.data.domain.Pageable;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.data.jpa.repository.Query;
+&nbsp;import org.springframework.data.repository.query.Param;
+&nbsp;import org.springframework.stereotype.Repository;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@Repository
+&nbsp;public interface SupportChatRepository extends JpaRepository&lt;SupportChat, Long&gt; {
+&nbsp;
+&nbsp;    // 查找用户的所有对话记录
+&nbsp;    List&lt;SupportChat&gt; findByUserIdOrderByCreatedAtAsc(Long userId);
+&nbsp;
+&nbsp;    // 查找用户与特定客服的对话记录
+&nbsp;    List&lt;SupportChat&gt; findByUserIdAndSupportIdOrderByCreatedAtAsc(Long userId, Long supportId);
+&nbsp;
+&nbsp;    // 查找客服的所有对话记录
+&nbsp;    List&lt;SupportChat&gt; findBySupportIdOrderByCreatedAtDesc(Long supportId);
+&nbsp;
+&nbsp;    // 查找未分配客服的用户消息
+&nbsp;    List&lt;SupportChat&gt; findBySupportIdIsNullAndSenderTypeOrderByCreatedAtDesc(SupportChat.SenderType senderType);
+&nbsp;
+&nbsp;    // 统计用户未读消息数量
+&nbsp;    int countByUserIdAndSenderTypeAndIsReadFalse(Long userId, SupportChat.SenderType senderType);
+&nbsp;
+&nbsp;    // 统计客服未读消息数量
+&nbsp;    int countBySupportIdAndSenderTypeAndIsReadFalse(Long supportId, SupportChat.SenderType senderType);
+&nbsp;
+&nbsp;    // 获取客服工作台的客户列表
+&nbsp;    @Query(&quot;SELECT sc.userId FROM SupportChat sc WHERE sc.senderType = &#39;USER&#39; GROUP BY sc.userId ORDER BY MAX(sc.createdAt) DESC&quot;)
+&nbsp;    List&lt;Long&gt; findDistinctUserIdsOrderByLatestMessage();
+&nbsp;
+&nbsp;    // 获取特定客户的最新对话
+&nbsp;    @Query(&quot;SELECT sc FROM SupportChat sc WHERE sc.userId = :userId ORDER BY sc.createdAt DESC&quot;)
+&nbsp;    Page&lt;SupportChat&gt; findByUserIdOrderByCreatedAtDesc(@Param(&quot;userId&quot;) Long userId, Pageable pageable);
+&nbsp;
+&nbsp;    // 获取客户最后一条消息
+&nbsp;    @Query(&quot;SELECT sc FROM SupportChat sc WHERE sc.userId = :userId ORDER BY sc.createdAt DESC LIMIT 1&quot;)
+&nbsp;    SupportChat findLatestMessageByUserId(@Param(&quot;userId&quot;) Long userId);
+&nbsp;
+&nbsp;    // 删除用户的所有对话记录
+&nbsp;    void deleteByUserId(Long userId);
+&nbsp;
+&nbsp;    // 删除特定对话记录
+&nbsp;    void deleteByUserIdAndSupportId(Long userId, Long supportId);
+&nbsp;} 
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-07-18 23:35</div>
+</div>
+</body>
+</html>

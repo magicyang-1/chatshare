@@ -1,0 +1,192 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > UserRepository</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.aiplatform.repository</a>
+</div>
+
+<h1>Coverage Summary for Class: UserRepository (com.aiplatform.repository)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">UserRepository$MockitoMock$6bCbrpNv</td>
+  </tr>
+  <tr>
+    <td class="name">UserRepository$MockitoMock$6bCbrpNv$auxiliary$GhpispUz</td>
+  </tr>
+  <tr>
+    <td class="name">UserRepository$MockitoMock$6bCbrpNv$auxiliary$xRIXGHHp</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.aiplatform.repository;
+&nbsp;
+&nbsp;import com.aiplatform.entity.User;
+&nbsp;import org.springframework.data.domain.Page;
+&nbsp;import org.springframework.data.domain.Pageable;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+&nbsp;import org.springframework.data.jpa.repository.Modifying;
+&nbsp;import org.springframework.data.jpa.repository.Query;
+&nbsp;import org.springframework.data.repository.query.Param;
+&nbsp;import org.springframework.stereotype.Repository;
+&nbsp;
+&nbsp;import java.time.LocalDateTime;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;@Repository
+&nbsp;public interface UserRepository extends JpaRepository&lt;User, Long&gt;, JpaSpecificationExecutor&lt;User&gt; {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 根据邮箱查找用户
+&nbsp;     */
+&nbsp;    Optional&lt;User&gt; findByEmail(String email);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 根据用户名查找用户
+&nbsp;     */
+&nbsp;    Optional&lt;User&gt; findByUsername(String username);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 根据邮箱或用户名查找用户
+&nbsp;     */
+&nbsp;    Optional&lt;User&gt; findByEmailOrUsername(String email, String username);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 检查邮箱是否存在
+&nbsp;     */
+&nbsp;    boolean existsByEmail(String email);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 检查用户名是否存在
+&nbsp;     */
+&nbsp;    boolean existsByUsername(String username);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 根据角色查找用户
+&nbsp;     */
+&nbsp;    List&lt;User&gt; findByRole(User.UserRole role);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 根据状态查找用户
+&nbsp;     */
+&nbsp;    List&lt;User&gt; findByStatus(User.UserStatus status);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 根据角色和状态查找用户
+&nbsp;     */
+&nbsp;    Page&lt;User&gt; findByRoleAndStatus(User.UserRole role, User.UserStatus status, Pageable pageable);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 根据多个角色和状态查找用户
+&nbsp;     */
+&nbsp;    List&lt;User&gt; findByRoleInAndStatus(List&lt;User.UserRole&gt; roles, User.UserStatus status);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 查找活跃用户（有最后登录时间的用户）
+&nbsp;     */
+&nbsp;    @Query(&quot;SELECT u FROM User u WHERE u.status = &#39;active&#39; AND u.lastLogin &gt;= :since&quot;)
+&nbsp;    List&lt;User&gt; findActiveUsersSince(@Param(&quot;since&quot;) LocalDateTime since);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 更新用户最后登录时间
+&nbsp;     */
+&nbsp;    @Modifying
+&nbsp;    @Query(&quot;UPDATE User u SET u.lastLogin = :lastLogin WHERE u.id = :userId&quot;)
+&nbsp;    int updateLastLogin(@Param(&quot;userId&quot;) Long userId, @Param(&quot;lastLogin&quot;) LocalDateTime lastLogin);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 更新用户状态
+&nbsp;     */
+&nbsp;    @Modifying
+&nbsp;    @Query(&quot;UPDATE User u SET u.status = :status WHERE u.id = :userId&quot;)
+&nbsp;    int updateUserStatus(@Param(&quot;userId&quot;) Long userId, @Param(&quot;status&quot;) User.UserStatus status);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 根据关键字搜索用户（用户名、邮箱）
+&nbsp;     */
+&nbsp;    @Query(&quot;SELECT u FROM User u WHERE &quot; +
+&nbsp;           &quot;LOWER(u.username) LIKE LOWER(CONCAT(&#39;%&#39;, :keyword, &#39;%&#39;)) OR &quot; +
+&nbsp;           &quot;LOWER(u.email) LIKE LOWER(CONCAT(&#39;%&#39;, :keyword, &#39;%&#39;))&quot;)
+&nbsp;    Page&lt;User&gt; searchUsers(@Param(&quot;keyword&quot;) String keyword, Pageable pageable);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 统计用户数量
+&nbsp;     */
+&nbsp;    @Query(&quot;SELECT COUNT(u) FROM User u WHERE u.status = :status&quot;)
+&nbsp;    long countByStatus(@Param(&quot;status&quot;) User.UserStatus status);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 统计角色用户数量
+&nbsp;     */
+&nbsp;    @Query(&quot;SELECT COUNT(u) FROM User u WHERE u.role = :role&quot;)
+&nbsp;    long countByRole(@Param(&quot;role&quot;) User.UserRole role);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 查找最近注册的用户
+&nbsp;     */
+&nbsp;    @Query(&quot;SELECT u FROM User u WHERE u.createdAt &gt;= :since ORDER BY u.createdAt DESC&quot;)
+&nbsp;    List&lt;User&gt; findRecentUsers(@Param(&quot;since&quot;) LocalDateTime since);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 统计指定时间之后创建的用户数量
+&nbsp;     */
+&nbsp;    long countByCreatedAtAfter(LocalDateTime date);
+&nbsp;} 
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-07-18 23:35</div>
+</div>
+</body>
+</html>

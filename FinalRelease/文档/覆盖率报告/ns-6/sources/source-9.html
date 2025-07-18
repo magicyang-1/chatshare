@@ -1,0 +1,144 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > MessageRepository</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.aiplatform.repository</a>
+</div>
+
+<h1>Coverage Summary for Class: MessageRepository (com.aiplatform.repository)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">MessageRepository$MockitoMock$jJr3iLTA</td>
+  </tr>
+  <tr>
+    <td class="name">MessageRepository$MockitoMock$jJr3iLTA$auxiliary$nqZdZuoi</td>
+  </tr>
+  <tr>
+    <td class="name">MessageRepository$MockitoMock$jJr3iLTA$auxiliary$yP5q4iEu</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.aiplatform.repository;
+&nbsp;
+&nbsp;import com.aiplatform.entity.Message;
+&nbsp;import org.springframework.data.domain.Page;
+&nbsp;import org.springframework.data.domain.Pageable;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.data.jpa.repository.Query;
+&nbsp;import org.springframework.data.repository.query.Param;
+&nbsp;import org.springframework.stereotype.Repository;
+&nbsp;
+&nbsp;import java.time.LocalDateTime;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@Repository
+&nbsp;public interface MessageRepository extends JpaRepository&lt;Message, Long&gt; {
+&nbsp;
+&nbsp;    // 根据聊天ID查找消息
+&nbsp;    Page&lt;Message&gt; findByChatIdOrderByCreatedAtAsc(Long chatId, Pageable pageable);
+&nbsp;    
+&nbsp;    List&lt;Message&gt; findByChatIdOrderByCreatedAtAsc(Long chatId);
+&nbsp;
+&nbsp;    // 根据聊天ID和角色查找消息
+&nbsp;    List&lt;Message&gt; findByChatIdAndRoleOrderByCreatedAtAsc(Long chatId, Message.MessageRole role);
+&nbsp;
+&nbsp;    // 统计聊天消息数量
+&nbsp;    int countByChatId(Long chatId);
+&nbsp;
+&nbsp;    // 统计不同角色的消息数量
+&nbsp;    int countByChatIdAndRole(Long chatId, Message.MessageRole role);
+&nbsp;
+&nbsp;    // 查找最新的消息
+&nbsp;    @Query(&quot;SELECT m FROM Message m WHERE m.chatId = :chatId ORDER BY m.createdAt DESC&quot;)
+&nbsp;    List&lt;Message&gt; findLatestMessagesByChat(@Param(&quot;chatId&quot;) Long chatId, Pageable pageable);
+&nbsp;
+&nbsp;    // 搜索消息内容
+&nbsp;    @Query(&quot;SELECT m FROM Message m WHERE m.chatId = :chatId AND m.content LIKE %:content% ORDER BY m.createdAt ASC&quot;)
+&nbsp;    Page&lt;Message&gt; findByChatIdAndContentContaining(@Param(&quot;chatId&quot;) Long chatId, @Param(&quot;content&quot;) String content, Pageable pageable);
+&nbsp;
+&nbsp;    // 根据时间范围查找消息
+&nbsp;    @Query(&quot;SELECT m FROM Message m WHERE m.chatId = :chatId AND m.createdAt BETWEEN :startDate AND :endDate ORDER BY m.createdAt ASC&quot;)
+&nbsp;    List&lt;Message&gt; findByChatIdAndDateRange(@Param(&quot;chatId&quot;) Long chatId, 
+&nbsp;                                          @Param(&quot;startDate&quot;) LocalDateTime startDate, 
+&nbsp;                                          @Param(&quot;endDate&quot;) LocalDateTime endDate);
+&nbsp;
+&nbsp;    // 删除聊天的所有消息
+&nbsp;    void deleteByChatId(Long chatId);
+&nbsp;
+&nbsp;    // 查找系统消息
+&nbsp;    @Query(&quot;SELECT m FROM Message m WHERE m.role = &#39;system&#39; ORDER BY m.createdAt DESC&quot;)
+&nbsp;    Page&lt;Message&gt; findSystemMessages(Pageable pageable);
+&nbsp;
+&nbsp;    // 统计今日消息数量
+&nbsp;    @Query(&quot;SELECT COUNT(m) FROM Message m WHERE m.createdAt &gt;= :startOfDay&quot;)
+&nbsp;    long countTodayMessages(@Param(&quot;startOfDay&quot;) LocalDateTime startOfDay);
+&nbsp;
+&nbsp;    // 统计聊天中用户消息数量
+&nbsp;    @Query(&quot;SELECT COUNT(m) FROM Message m WHERE m.chatId = :chatId AND m.role = &#39;user&#39;&quot;)
+&nbsp;    int countUserMessagesByChat(@Param(&quot;chatId&quot;) Long chatId);
+&nbsp;
+&nbsp;    // 统计聊天中助手消息数量
+&nbsp;    @Query(&quot;SELECT COUNT(m) FROM Message m WHERE m.chatId = :chatId AND m.role = &#39;assistant&#39;&quot;)
+&nbsp;    int countAssistantMessagesByChat(@Param(&quot;chatId&quot;) Long chatId);
+&nbsp;
+&nbsp;    // 统计用户的所有消息数量
+&nbsp;    @Query(&quot;SELECT COUNT(m) FROM Message m INNER JOIN Chat c ON m.chatId = c.id WHERE c.userId = :userId&quot;)
+&nbsp;    int countByUserId(@Param(&quot;userId&quot;) Long userId);
+&nbsp;} 
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-07-18 23:35</div>
+</div>
+</body>
+</html>

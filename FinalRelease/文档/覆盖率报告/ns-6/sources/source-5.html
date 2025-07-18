@@ -1,0 +1,115 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > UserSettingsRepository</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.aiplatform.repository</a>
+</div>
+
+<h1>Coverage Summary for Class: UserSettingsRepository (com.aiplatform.repository)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">UserSettingsRepository$MockitoMock$wX37pXdY</td>
+  </tr>
+  <tr>
+    <td class="name">UserSettingsRepository$MockitoMock$wX37pXdY$auxiliary$AmZqkzEM</td>
+  </tr>
+  <tr>
+    <td class="name">UserSettingsRepository$MockitoMock$wX37pXdY$auxiliary$fFPUhJT3</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.aiplatform.repository;
+&nbsp;
+&nbsp;import com.aiplatform.entity.UserSettings;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.data.jpa.repository.Query;
+&nbsp;import org.springframework.data.repository.query.Param;
+&nbsp;import org.springframework.stereotype.Repository;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;@Repository
+&nbsp;public interface UserSettingsRepository extends JpaRepository&lt;UserSettings, Long&gt; {
+&nbsp;
+&nbsp;    // 根据用户ID查找设置
+&nbsp;    Optional&lt;UserSettings&gt; findByUserId(Long userId);
+&nbsp;
+&nbsp;    // 查找启用自动清理的用户设置
+&nbsp;    @Query(&quot;SELECT us FROM UserSettings us WHERE us.autoCleanupEnabled = true&quot;)
+&nbsp;    List&lt;UserSettings&gt; findWithAutoCleanupEnabled();
+&nbsp;
+&nbsp;    // 根据清理频率查找设置
+&nbsp;    List&lt;UserSettings&gt; findByCleanupFrequency(UserSettings.CleanupFrequency frequency);
+&nbsp;
+&nbsp;    // 根据最大聊天数查找设置
+&nbsp;    @Query(&quot;SELECT us FROM UserSettings us WHERE us.maxChats &gt; :minChats&quot;)
+&nbsp;    List&lt;UserSettings&gt; findWithMaxChatsGreaterThan(@Param(&quot;minChats&quot;) Integer minChats);
+&nbsp;
+&nbsp;    // 检查用户是否存在设置
+&nbsp;    boolean existsByUserId(Long userId);
+&nbsp;
+&nbsp;    // 删除用户设置
+&nbsp;    void deleteByUserId(Long userId);
+&nbsp;
+&nbsp;    // 查找需要清理的用户设置（启用自动清理且到了清理时间）
+&nbsp;    @Query(&quot;SELECT us FROM UserSettings us WHERE us.autoCleanupEnabled = true AND us.cleanupFrequency = :frequency&quot;)
+&nbsp;    List&lt;UserSettings&gt; findForCleanup(@Param(&quot;frequency&quot;) UserSettings.CleanupFrequency frequency);
+&nbsp;} 
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-07-18 23:35</div>
+</div>
+</body>
+</html>

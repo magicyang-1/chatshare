@@ -1,0 +1,346 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > FileController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.aiplatform.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: FileController (com.aiplatform.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">FileController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    87.5%
+  </span>
+  <span class="absValue">
+    (7/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    96.7%
+  </span>
+  <span class="absValue">
+    (87/90)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.aiplatform.controller;
+&nbsp;
+&nbsp;import com.aiplatform.entity.MessageAttachment;
+&nbsp;import com.aiplatform.service.FileUploadService;
+&nbsp;import com.aiplatform.exception.BusinessException;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.http.HttpHeaders;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.http.MediaType;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.security.access.prepost.PreAuthorize;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;import org.springframework.web.multipart.MultipartFile;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;@RestController
+&nbsp;@RequestMapping(&quot;/files&quot;)
+<b class="fc">&nbsp;@RequiredArgsConstructor</b>
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;public class FileController {
+&nbsp;
+&nbsp;    private final FileUploadService fileUploadService;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 上传文件
+&nbsp;     */
+&nbsp;    @PostMapping(&quot;/upload&quot;)
+&nbsp;    @PreAuthorize(&quot;hasRole(&#39;user&#39;) or hasRole(&#39;admin&#39;)&quot;)
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; uploadFile(
+&nbsp;            @RequestParam(&quot;file&quot;) MultipartFile file,
+&nbsp;            @RequestParam(value = &quot;messageId&quot;, required = false) Long messageId) {
+&nbsp;        
+&nbsp;        try {
+<b class="fc">&nbsp;            log.info(&quot;接收文件上传请求: {}, messageId: {}&quot;, file.getOriginalFilename(), messageId);</b>
+&nbsp;            
+<b class="fc">&nbsp;            if (file.isEmpty()) {</b>
+<b class="fc">&nbsp;                return ResponseEntity.badRequest()</b>
+<b class="fc">&nbsp;                    .body(createErrorResponse(&quot;文件不能为空&quot;));</b>
+&nbsp;            }
+&nbsp;
+<b class="fc">&nbsp;            MessageAttachment attachment = fileUploadService.uploadFile(file, messageId);</b>
+&nbsp;            
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            response.put(&quot;success&quot;, true);</b>
+<b class="fc">&nbsp;            response.put(&quot;message&quot;, &quot;文件上传成功&quot;);</b>
+&nbsp;            
+&nbsp;            // 添加前端期望的字段到根级别
+<b class="fc">&nbsp;            response.put(&quot;fileId&quot;, attachment.getId());</b>
+<b class="fc">&nbsp;            response.put(&quot;fileUrl&quot;, attachment.getFileUrl());</b>
+&nbsp;            
+&nbsp;            // 创建附件数据Map
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; attachmentData = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            attachmentData.put(&quot;id&quot;, attachment.getId());</b>
+<b class="fc">&nbsp;            attachmentData.put(&quot;fileName&quot;, attachment.getFileName());</b>
+<b class="fc">&nbsp;            attachmentData.put(&quot;originalName&quot;, attachment.getOriginalName());</b>
+<b class="fc">&nbsp;            attachmentData.put(&quot;fileSize&quot;, attachment.getFileSize());</b>
+<b class="fc">&nbsp;            attachmentData.put(&quot;fileSizeFormatted&quot;, attachment.getFileSizeFormatted());</b>
+<b class="fc">&nbsp;            attachmentData.put(&quot;mimeType&quot;, attachment.getMimeType());</b>
+<b class="fc">&nbsp;            attachmentData.put(&quot;attachmentType&quot;, attachment.getAttachmentType());</b>
+<b class="fc">&nbsp;            attachmentData.put(&quot;width&quot;, attachment.getWidth());</b>
+<b class="fc">&nbsp;            attachmentData.put(&quot;height&quot;, attachment.getHeight());</b>
+<b class="fc">&nbsp;            attachmentData.put(&quot;dimensions&quot;, attachment.getDimensions());</b>
+<b class="fc">&nbsp;            attachmentData.put(&quot;fileUrl&quot;, attachment.getFileUrl());</b>
+<b class="fc">&nbsp;            attachmentData.put(&quot;isImage&quot;, attachment.isImage());</b>
+<b class="fc">&nbsp;            attachmentData.put(&quot;createdAt&quot;, attachment.getCreatedAt());</b>
+&nbsp;            
+<b class="fc">&nbsp;            response.put(&quot;data&quot;, attachmentData);</b>
+&nbsp;            
+<b class="fc">&nbsp;            log.info(&quot;文件上传成功: {} -&gt; {}&quot;, file.getOriginalFilename(), attachment.getFileName());</b>
+<b class="fc">&nbsp;            return ResponseEntity.ok(response);</b>
+&nbsp;            
+&nbsp;        } catch (BusinessException e) {
+&nbsp;//            log.warn(&quot;文件上传业务异常: {}&quot;, e.getMessage());
+<b class="fc">&nbsp;            return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));</b>
+&nbsp;        } catch (IOException e) {
+&nbsp;//            log.error(&quot;文件上传IO异常: &quot;, e);
+<b class="fc">&nbsp;            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(createErrorResponse(&quot;文件上传失败：&quot; + e.getMessage()));</b>
+&nbsp;        } catch (Exception e) {
+<b class="fc">&nbsp;            log.error(&quot;文件上传未知异常: &quot;, e);</b>
+<b class="fc">&nbsp;            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(createErrorResponse(&quot;系统异常，请稍后重试&quot;));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 获取文件内容
+&nbsp;     */
+&nbsp;    @GetMapping(&quot;/{fileName}&quot;)
+&nbsp;    public ResponseEntity&lt;byte[]&gt; getFile(@PathVariable String fileName) {
+&nbsp;        try {
+<b class="fc">&nbsp;            log.debug(&quot;请求文件: {}&quot;, fileName);</b>
+&nbsp;            
+&nbsp;            // 先获取文件信息以确定MIME类型
+<b class="fc">&nbsp;            MessageAttachment attachment = fileUploadService.getFileInfo(fileName);</b>
+<b class="fc">&nbsp;            byte[] fileContent = fileUploadService.getFileContent(fileName);</b>
+&nbsp;            
+&nbsp;            // 根据文件的MIME类型设置Content-Type
+<b class="fc">&nbsp;            HttpHeaders headers = new HttpHeaders();</b>
+<b class="fc">&nbsp;            String mimeType = attachment.getMimeType();</b>
+<b class="pc">&nbsp;            if (mimeType != null &amp;&amp; !mimeType.trim().isEmpty()) {</b>
+<b class="fc">&nbsp;                headers.setContentType(MediaType.parseMediaType(mimeType));</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);</b>
+&nbsp;            }
+&nbsp;            
+&nbsp;            // 对于图片文件，设置为inline显示；其他文件设置为attachment下载
+&nbsp;            // 避免中文文件名编码问题，使用系统生成的文件名
+<b class="fc">&nbsp;            if (attachment.isImage()) {</b>
+<b class="fc">&nbsp;                headers.add(HttpHeaders.CONTENT_DISPOSITION, &quot;inline; filename=\&quot;&quot; + fileName + &quot;\&quot;&quot;);</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                headers.add(HttpHeaders.CONTENT_DISPOSITION, &quot;attachment; filename=\&quot;&quot; + fileName + &quot;\&quot;&quot;);</b>
+&nbsp;            }
+&nbsp;            
+<b class="fc">&nbsp;            return ResponseEntity.ok()</b>
+<b class="fc">&nbsp;                .headers(headers)</b>
+<b class="fc">&nbsp;                .body(fileContent);</b>
+&nbsp;                
+&nbsp;        } catch (BusinessException e) {
+&nbsp;//            log.warn(&quot;获取文件业务异常: {}&quot;, e.getMessage());
+<b class="fc">&nbsp;            return ResponseEntity.notFound().build();</b>
+&nbsp;        } catch (IOException e) {
+&nbsp;//            log.error(&quot;获取文件IO异常: &quot;, e);
+<b class="fc">&nbsp;            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</b>
+&nbsp;        } catch (Exception e) {
+&nbsp;//            log.error(&quot;获取文件未知异常: &quot;, e);
+<b class="nc">&nbsp;            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 删除文件
+&nbsp;     */
+&nbsp;    @DeleteMapping(&quot;/{fileName}&quot;)
+&nbsp;    @PreAuthorize(&quot;hasRole(&#39;user&#39;) or hasRole(&#39;admin&#39;)&quot;)
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; deleteFile(@PathVariable String fileName) {
+&nbsp;        try {
+<b class="fc">&nbsp;            log.info(&quot;删除文件请求: {}&quot;, fileName);</b>
+&nbsp;            
+<b class="fc">&nbsp;            fileUploadService.deleteFile(fileName);</b>
+&nbsp;            
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            response.put(&quot;success&quot;, true);</b>
+<b class="fc">&nbsp;            response.put(&quot;message&quot;, &quot;文件删除成功&quot;);</b>
+&nbsp;            
+<b class="fc">&nbsp;            log.info(&quot;文件删除成功: {}&quot;, fileName);</b>
+<b class="fc">&nbsp;            return ResponseEntity.ok(response);</b>
+&nbsp;            
+&nbsp;        } catch (BusinessException e) {
+<b class="fc">&nbsp;            log.warn(&quot;删除文件业务异常: {}&quot;, e.getMessage());</b>
+<b class="fc">&nbsp;            return ResponseEntity.badRequest()</b>
+<b class="fc">&nbsp;                .body(createErrorResponse(e.getMessage()));</b>
+&nbsp;        } catch (IOException e) {
+&nbsp;//            log.error(&quot;删除文件IO异常: &quot;, e);
+<b class="fc">&nbsp;            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(createErrorResponse(&quot;文件删除失败：&quot; + e.getMessage()));</b>
+&nbsp;        } catch (Exception e) {
+&nbsp;//            log.error(&quot;删除文件未知异常: &quot;, e);
+<b class="nc">&nbsp;            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(createErrorResponse(&quot;系统异常，请稍后重试&quot;));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 获取文件的Base64编码（用于图片预览）
+&nbsp;     */
+&nbsp;    @GetMapping(&quot;/{fileName}/base64&quot;)
+&nbsp;    @PreAuthorize(&quot;hasRole(&#39;user&#39;) or hasRole(&#39;admin&#39;)&quot;)
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; getFileBase64(@PathVariable String fileName) {
+&nbsp;        try {
+<b class="fc">&nbsp;            log.debug(&quot;请求文件Base64: {}&quot;, fileName);</b>
+&nbsp;            
+<b class="fc">&nbsp;            String base64 = fileUploadService.imageToBase64(fileName);</b>
+&nbsp;            
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            response.put(&quot;success&quot;, true);</b>
+&nbsp;            
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; data = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            data.put(&quot;fileName&quot;, fileName);</b>
+<b class="fc">&nbsp;            data.put(&quot;base64&quot;, base64);</b>
+<b class="fc">&nbsp;            response.put(&quot;data&quot;, data);</b>
+&nbsp;            
+<b class="fc">&nbsp;            return ResponseEntity.ok(response);</b>
+&nbsp;            
+&nbsp;        } catch (BusinessException e) {
+<b class="fc">&nbsp;            log.warn(&quot;获取文件Base64业务异常: {}&quot;, e.getMessage());</b>
+<b class="fc">&nbsp;            return ResponseEntity.badRequest()</b>
+<b class="fc">&nbsp;                .body(createErrorResponse(e.getMessage()));</b>
+&nbsp;        } catch (IOException e) {
+&nbsp;//            log.error(&quot;获取文件Base64 IO异常: &quot;, e);
+<b class="fc">&nbsp;            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(createErrorResponse(&quot;获取文件失败：&quot; + e.getMessage()));</b>
+&nbsp;        } catch (Exception e) {
+&nbsp;//            log.error(&quot;获取文件Base64未知异常: &quot;, e);
+<b class="nc">&nbsp;            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(createErrorResponse(&quot;系统异常，请稍后重试&quot;));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 清理孤立文件（管理员功能）
+&nbsp;     */
+&nbsp;    @PostMapping(&quot;/cleanup&quot;)
+&nbsp;    @PreAuthorize(&quot;hasRole(&#39;admin&#39;)&quot;)
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; cleanupOrphanedFiles() {
+&nbsp;        try {
+<b class="fc">&nbsp;            log.info(&quot;开始清理孤立文件&quot;);</b>
+&nbsp;            
+<b class="fc">&nbsp;            fileUploadService.cleanOrphanedFiles();</b>
+&nbsp;            
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            response.put(&quot;success&quot;, true);</b>
+<b class="fc">&nbsp;            response.put(&quot;message&quot;, &quot;孤立文件清理完成&quot;);</b>
+&nbsp;            
+<b class="fc">&nbsp;            log.info(&quot;孤立文件清理完成&quot;);</b>
+<b class="fc">&nbsp;            return ResponseEntity.ok(response);</b>
+&nbsp;            
+&nbsp;        } catch (Exception e) {
+<b class="fc">&nbsp;            log.error(&quot;清理孤立文件异常: &quot;, e);</b>
+<b class="fc">&nbsp;            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</b>
+<b class="fc">&nbsp;                .body(createErrorResponse(&quot;清理失败：&quot; + e.getMessage()));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // 私有辅助方法
+&nbsp;    private Map&lt;String, Object&gt; createErrorResponse(String message) {
+<b class="fc">&nbsp;        Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        response.put(&quot;success&quot;, false);</b>
+<b class="fc">&nbsp;        response.put(&quot;message&quot;, message);</b>
+<b class="fc">&nbsp;        return response;</b>
+&nbsp;    }
+&nbsp;} 
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-07-18 23:35</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,117 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > PromptLikeRepository</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.aiplatform.repository</a>
+</div>
+
+<h1>Coverage Summary for Class: PromptLikeRepository (com.aiplatform.repository)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">PromptLikeRepository$MockitoMock$8tG55Cvw</td>
+  </tr>
+  <tr>
+    <td class="name">PromptLikeRepository$MockitoMock$8tG55Cvw$auxiliary$NX6xNYNM</td>
+  </tr>
+  <tr>
+    <td class="name">PromptLikeRepository$MockitoMock$8tG55Cvw$auxiliary$VF64Jzxg</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.aiplatform.repository;
+&nbsp;
+&nbsp;import com.aiplatform.entity.PromptLike;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.data.jpa.repository.Query;
+&nbsp;import org.springframework.data.repository.query.Param;
+&nbsp;import org.springframework.stereotype.Repository;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;@Repository
+&nbsp;public interface PromptLikeRepository extends JpaRepository&lt;PromptLike, Long&gt; {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 查找用户对特定模板的点赞记录
+&nbsp;     */
+&nbsp;    Optional&lt;PromptLike&gt; findByTemplateIdAndUserId(Long templateId, Long userId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 检查用户是否已点赞
+&nbsp;     */
+&nbsp;    boolean existsByTemplateIdAndUserId(Long templateId, Long userId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 统计模板的点赞数
+&nbsp;     */
+&nbsp;    int countByTemplateId(Long templateId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 获取用户点赞的模板ID列表
+&nbsp;     */
+&nbsp;    @Query(&quot;SELECT pl.templateId FROM PromptLike pl WHERE pl.userId = :userId&quot;)
+&nbsp;    List&lt;Long&gt; findTemplateIdsByUserId(@Param(&quot;userId&quot;) Long userId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 删除用户对模板的点赞
+&nbsp;     */
+&nbsp;    void deleteByTemplateIdAndUserId(Long templateId, Long userId);
+&nbsp;} 
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-07-18 23:35</div>
+</div>
+</body>
+</html>

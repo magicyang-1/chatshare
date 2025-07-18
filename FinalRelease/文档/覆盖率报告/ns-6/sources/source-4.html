@@ -1,0 +1,124 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AdminMessageRepository</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.aiplatform.repository</a>
+</div>
+
+<h1>Coverage Summary for Class: AdminMessageRepository (com.aiplatform.repository)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">AdminMessageRepository$MockitoMock$qACODTdh</td>
+  </tr>
+  <tr>
+    <td class="name">AdminMessageRepository$MockitoMock$qACODTdh$auxiliary$SflRC1IZ</td>
+  </tr>
+  <tr>
+    <td class="name">AdminMessageRepository$MockitoMock$qACODTdh$auxiliary$vGZgejvT</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.aiplatform.repository;
+&nbsp;
+&nbsp;import com.aiplatform.entity.AdminMessage;
+&nbsp;import org.springframework.data.domain.Page;
+&nbsp;import org.springframework.data.domain.Pageable;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.data.jpa.repository.Query;
+&nbsp;import org.springframework.data.repository.query.Param;
+&nbsp;import org.springframework.stereotype.Repository;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@Repository
+&nbsp;public interface AdminMessageRepository extends JpaRepository&lt;AdminMessage, Long&gt; {
+&nbsp;
+&nbsp;    // 查找发送给特定用户的消息
+&nbsp;    Page&lt;AdminMessage&gt; findByToUserIdOrderByCreatedAtDesc(Long toUserId, Pageable pageable);
+&nbsp;
+&nbsp;    // 查找特定用户发送的消息
+&nbsp;    Page&lt;AdminMessage&gt; findByFromUserIdOrderByCreatedAtDesc(Long fromUserId, Pageable pageable);
+&nbsp;
+&nbsp;    // 查找未读消息
+&nbsp;    Page&lt;AdminMessage&gt; findByToUserIdAndIsReadFalseOrderByCreatedAtDesc(Long toUserId, Pageable pageable);
+&nbsp;
+&nbsp;    // 查找广播消息
+&nbsp;    Page&lt;AdminMessage&gt; findByMessageTypeOrderByCreatedAtDesc(AdminMessage.MessageType messageType, Pageable pageable);
+&nbsp;
+&nbsp;    // 统计未读消息数量
+&nbsp;    int countByToUserIdAndIsReadFalse(Long toUserId);
+&nbsp;
+&nbsp;    // 查找用户相关的所有消息（发送或接收）
+&nbsp;    @Query(&quot;SELECT m FROM AdminMessage m WHERE m.toUserId = :userId OR m.fromUserId = :userId ORDER BY m.createdAt DESC&quot;)
+&nbsp;    Page&lt;AdminMessage&gt; findUserRelatedMessages(@Param(&quot;userId&quot;) Long userId, Pageable pageable);
+&nbsp;
+&nbsp;    // 标记消息为已读
+&nbsp;    @Query(&quot;UPDATE AdminMessage m SET m.isRead = true WHERE m.id = :messageId AND m.toUserId = :userId&quot;)
+&nbsp;    int markAsRead(@Param(&quot;messageId&quot;) Long messageId, @Param(&quot;userId&quot;) Long userId);
+&nbsp;
+&nbsp;    // 删除用户相关的所有消息
+&nbsp;    void deleteByFromUserIdOrToUserId(Long fromUserId, Long toUserId);
+&nbsp;    
+&nbsp;    // 根据接收者ID和消息类型查询（用于客服对话）
+&nbsp;    List&lt;AdminMessage&gt; findByToUserIdAndMessageTypeOrderByCreatedAtAsc(Long toUserId, AdminMessage.MessageType messageType);
+&nbsp;    
+&nbsp;    // 按消息类型查询所有消息，按创建时间降序排列（用于客服工作台）
+&nbsp;    List&lt;AdminMessage&gt; findByMessageTypeOrderByCreatedAtDesc(AdminMessage.MessageType messageType);
+&nbsp;} 
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-07-18 23:35</div>
+</div>
+</body>
+</html>

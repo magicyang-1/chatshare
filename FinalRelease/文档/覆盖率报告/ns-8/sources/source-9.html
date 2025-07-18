@@ -1,0 +1,377 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > PromptTemplateService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.aiplatform.service</a>
+</div>
+
+<h1>Coverage Summary for Class: PromptTemplateService (com.aiplatform.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PromptTemplateService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83.3%
+  </span>
+  <span class="absValue">
+    (20/24)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    44.4%
+  </span>
+  <span class="absValue">
+    (8/18)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85.4%
+  </span>
+  <span class="absValue">
+    (70/82)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.aiplatform.service;
+&nbsp;
+&nbsp;import com.aiplatform.entity.*;
+&nbsp;import com.aiplatform.dto.PromptTemplateDTO;
+&nbsp;import com.aiplatform.repository.*;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.data.domain.Page;
+&nbsp;import org.springframework.data.domain.PageRequest;
+&nbsp;import org.springframework.data.domain.Pageable;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.function.Function;
+&nbsp;
+&nbsp;@Service
+<b class="fc">&nbsp;@RequiredArgsConstructor</b>
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;public class PromptTemplateService {
+&nbsp;
+&nbsp;    private final PromptTemplateRepository promptTemplateRepository;
+&nbsp;    private final PromptCategoryRepository promptCategoryRepository;
+&nbsp;    private final PromptLikeRepository promptLikeRepository;
+&nbsp;    private final PromptUsageStatsRepository promptUsageStatsRepository;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 获取所有分类
+&nbsp;     */
+&nbsp;    public List&lt;PromptCategory&gt; getAllCategories() {
+<b class="fc">&nbsp;        return promptCategoryRepository.findByIsActiveTrueOrderBySortOrderAsc();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 根据分类获取模板
+&nbsp;     */
+&nbsp;    public Page&lt;PromptTemplate&gt; getTemplatesByCategory(Long categoryId, int page, int size) {
+<b class="nc">&nbsp;        Pageable pageable = PageRequest.of(page, size);</b>
+<b class="nc">&nbsp;        if (categoryId == null || categoryId == 0) {</b>
+<b class="nc">&nbsp;            return promptTemplateRepository.findByIsPublicTrueOrderByIsFeaturedDescUsageCountDescCreatedAtDesc(pageable);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return promptTemplateRepository.findByCategoryIdAndIsPublicTrueOrderByIsFeaturedDescUsageCountDescCreatedAtDesc(categoryId, pageable);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 获取精选模板
+&nbsp;     */
+&nbsp;    public List&lt;PromptTemplate&gt; getFeaturedTemplates() {
+<b class="fc">&nbsp;        return promptTemplateRepository.findByIsFeaturedTrueAndIsPublicTrueOrderByUsageCountDescCreatedAtDesc();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 获取官方模板
+&nbsp;     */
+&nbsp;    public Page&lt;PromptTemplate&gt; getOfficialTemplates(int page, int size) {
+<b class="nc">&nbsp;        Pageable pageable = PageRequest.of(page, size);</b>
+<b class="nc">&nbsp;        return promptTemplateRepository.findByTemplateTypeAndIsPublicTrueOrderByUsageCountDescCreatedAtDesc(</b>
+&nbsp;                PromptTemplate.TemplateType.OFFICIAL, pageable);
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 获取用户模板
+&nbsp;     */
+&nbsp;    public Page&lt;PromptTemplate&gt; getUserTemplates(int page, int size) {
+<b class="nc">&nbsp;        Pageable pageable = PageRequest.of(page, size);</b>
+<b class="nc">&nbsp;        return promptTemplateRepository.findByTemplateTypeAndIsPublicTrueOrderByUsageCountDescCreatedAtDesc(</b>
+&nbsp;                PromptTemplate.TemplateType.USER, pageable);
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 搜索模板
+&nbsp;     */
+&nbsp;    public Page&lt;PromptTemplate&gt; searchTemplates(String keyword, Long categoryId, int page, int size) {
+<b class="nc">&nbsp;        Pageable pageable = PageRequest.of(page, size);</b>
+<b class="nc">&nbsp;        if (categoryId != null &amp;&amp; categoryId &gt; 0) {</b>
+<b class="nc">&nbsp;            return promptTemplateRepository.searchTemplatesByCategory(categoryId, keyword, pageable);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return promptTemplateRepository.searchTemplates(keyword, pageable);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 获取模板详情
+&nbsp;     */
+&nbsp;    public Optional&lt;PromptTemplate&gt; getTemplateById(Long id) {
+<b class="fc">&nbsp;        return promptTemplateRepository.findById(id);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 创建模板
+&nbsp;     */
+&nbsp;    @Transactional
+&nbsp;    public PromptTemplate createTemplate(PromptTemplate template) {
+<b class="fc">&nbsp;        log.info(&quot;创建模板: {}&quot;, template.getTitle());</b>
+<b class="fc">&nbsp;        return promptTemplateRepository.save(template);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 更新模板
+&nbsp;     */
+&nbsp;    @Transactional
+&nbsp;    public PromptTemplate updateTemplate(Long id, PromptTemplate updatedTemplate) {
+<b class="fc">&nbsp;        Optional&lt;PromptTemplate&gt; existingTemplate = promptTemplateRepository.findById(id);</b>
+<b class="fc">&nbsp;        if (existingTemplate.isPresent()) {</b>
+<b class="fc">&nbsp;            PromptTemplate template = existingTemplate.get();</b>
+<b class="fc">&nbsp;            template.setTitle(updatedTemplate.getTitle());</b>
+<b class="fc">&nbsp;            template.setDescription(updatedTemplate.getDescription());</b>
+<b class="fc">&nbsp;            template.setContent(updatedTemplate.getContent());</b>
+<b class="fc">&nbsp;            template.setCategoryId(updatedTemplate.getCategoryId());</b>
+<b class="fc">&nbsp;            template.setAiModel(updatedTemplate.getAiModel());</b>
+<b class="fc">&nbsp;            template.setTags(updatedTemplate.getTags());</b>
+<b class="fc">&nbsp;            template.setDifficultyLevel(updatedTemplate.getDifficultyLevel());</b>
+<b class="fc">&nbsp;            template.setIsPublic(updatedTemplate.getIsPublic());</b>
+&nbsp;            
+<b class="fc">&nbsp;            log.info(&quot;更新模板: {}&quot;, template.getTitle());</b>
+<b class="fc">&nbsp;            return promptTemplateRepository.save(template);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        throw new RuntimeException(&quot;模板不存在&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 删除模板
+&nbsp;     */
+&nbsp;    @Transactional
+&nbsp;    public void deleteTemplate(Long id) {
+<b class="fc">&nbsp;        log.info(&quot;删除模板: {}&quot;, id);</b>
+<b class="fc">&nbsp;        promptTemplateRepository.deleteById(id);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 点赞/取消点赞模板
+&nbsp;     */
+&nbsp;    @Transactional
+&nbsp;    public boolean toggleLike(Long templateId, Long userId) {
+<b class="fc">&nbsp;        Optional&lt;PromptLike&gt; existingLike = promptLikeRepository.findByTemplateIdAndUserId(templateId, userId);</b>
+&nbsp;        
+<b class="fc">&nbsp;        if (existingLike.isPresent()) {</b>
+&nbsp;            // 取消点赞
+<b class="fc">&nbsp;            promptLikeRepository.delete(existingLike.get());</b>
+<b class="fc">&nbsp;            updateLikeCount(templateId);</b>
+<b class="fc">&nbsp;            log.info(&quot;用户 {} 取消点赞模板 {}&quot;, userId, templateId);</b>
+<b class="fc">&nbsp;            return false;</b>
+&nbsp;        } else {
+&nbsp;            // 点赞
+<b class="fc">&nbsp;            PromptLike like = new PromptLike();</b>
+<b class="fc">&nbsp;            like.setTemplateId(templateId);</b>
+<b class="fc">&nbsp;            like.setUserId(userId);</b>
+<b class="fc">&nbsp;            promptLikeRepository.save(like);</b>
+<b class="fc">&nbsp;            updateLikeCount(templateId);</b>
+<b class="fc">&nbsp;            log.info(&quot;用户 {} 点赞模板 {}&quot;, userId, templateId);</b>
+<b class="fc">&nbsp;            return true;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 检查用户是否已点赞
+&nbsp;     */
+&nbsp;    public boolean isLikedByUser(Long templateId, Long userId) {
+<b class="fc">&nbsp;        return promptLikeRepository.existsByTemplateIdAndUserId(templateId, userId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 记录使用统计
+&nbsp;     */
+&nbsp;    @Transactional
+&nbsp;    public void recordUsage(Long templateId, Long userId, String aiModel) {
+<b class="fc">&nbsp;        PromptUsageStats stats = new PromptUsageStats();</b>
+<b class="fc">&nbsp;        stats.setTemplateId(templateId);</b>
+<b class="fc">&nbsp;        stats.setUserId(userId);</b>
+<b class="fc">&nbsp;        stats.setAiModel(aiModel);</b>
+<b class="fc">&nbsp;        promptUsageStatsRepository.save(stats);</b>
+&nbsp;        
+&nbsp;        // 更新使用次数
+<b class="fc">&nbsp;        updateUsageCount(templateId);</b>
+<b class="fc">&nbsp;        log.info(&quot;记录模板 {} 使用统计, 用户: {}, 模型: {}&quot;, templateId, userId, aiModel);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 获取用户收藏的模板
+&nbsp;     */
+&nbsp;    public List&lt;Long&gt; getUserLikedTemplates(Long userId) {
+<b class="fc">&nbsp;        return promptLikeRepository.findTemplateIdsByUserId(userId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 获取热门模板
+&nbsp;     */
+&nbsp;    public List&lt;PromptTemplate&gt; getPopularTemplates() {
+<b class="fc">&nbsp;        return promptTemplateRepository.findTop10ByIsPublicTrueOrderByUsageCountDesc();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 获取最新模板
+&nbsp;     */
+&nbsp;    public List&lt;PromptTemplate&gt; getLatestTemplates() {
+<b class="fc">&nbsp;        return promptTemplateRepository.findTop10ByIsPublicTrueOrderByCreatedAtDesc();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 根据AI模型推荐模板
+&nbsp;     */
+&nbsp;    public List&lt;PromptTemplate&gt; getRecommendedTemplates(String aiModel) {
+<b class="fc">&nbsp;        return promptTemplateRepository.findByAiModelAndIsPublicTrueOrderByUsageCountDescCreatedAtDesc(aiModel);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 更新点赞数
+&nbsp;     */
+&nbsp;    private void updateLikeCount(Long templateId) {
+<b class="fc">&nbsp;        Optional&lt;PromptTemplate&gt; template = promptTemplateRepository.findById(templateId);</b>
+<b class="pc">&nbsp;        if (template.isPresent()) {</b>
+<b class="fc">&nbsp;            int likeCount = promptLikeRepository.countByTemplateId(templateId);</b>
+<b class="fc">&nbsp;            PromptTemplate t = template.get();</b>
+<b class="fc">&nbsp;            t.setLikeCount(likeCount);</b>
+<b class="fc">&nbsp;            promptTemplateRepository.save(t);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 更新使用次数
+&nbsp;     */
+&nbsp;    private void updateUsageCount(Long templateId) {
+<b class="fc">&nbsp;        Optional&lt;PromptTemplate&gt; template = promptTemplateRepository.findById(templateId);</b>
+<b class="pc">&nbsp;        if (template.isPresent()) {</b>
+<b class="fc">&nbsp;            int usageCount = promptUsageStatsRepository.countByTemplateId(templateId);</b>
+<b class="fc">&nbsp;            PromptTemplate t = template.get();</b>
+<b class="fc">&nbsp;            t.setUsageCount(usageCount);</b>
+<b class="fc">&nbsp;            promptTemplateRepository.save(t);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 转换模板列表为DTO（包含分类名称和点赞状态）
+&nbsp;     */
+&nbsp;    public List&lt;PromptTemplateDTO&gt; convertToDTO(List&lt;PromptTemplate&gt; templates, Long userId) {
+&nbsp;        // 获取所有分类
+<b class="fc">&nbsp;        List&lt;PromptCategory&gt; categories = promptCategoryRepository.findAll();</b>
+<b class="fc">&nbsp;        Map&lt;Long, PromptCategory&gt; categoryMap = categories.stream()</b>
+<b class="fc">&nbsp;                .collect(Collectors.toMap(PromptCategory::getId, Function.identity()));</b>
+&nbsp;        
+&nbsp;        // 获取用户点赞的模板ID列表
+<b class="fc">&nbsp;        List&lt;Long&gt; likedTemplateIds = userId != null ? getUserLikedTemplates(userId) : List.of();</b>
+&nbsp;        
+<b class="fc">&nbsp;        return templates.stream()</b>
+<b class="fc">&nbsp;                .map(template -&gt; PromptTemplateDTO.fromEntity(</b>
+&nbsp;                    template, 
+<b class="fc">&nbsp;                    categoryMap.get(template.getCategoryId()),</b>
+<b class="fc">&nbsp;                    likedTemplateIds.contains(template.getId())</b>
+&nbsp;                ))
+<b class="fc">&nbsp;                .collect(Collectors.toList());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 转换模板列表为DTO（不包含点赞状态）
+&nbsp;     */
+&nbsp;    public List&lt;PromptTemplateDTO&gt; convertToDTO(List&lt;PromptTemplate&gt; templates) {
+<b class="fc">&nbsp;        return convertToDTO(templates, null);</b>
+&nbsp;    }
+&nbsp;} 
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-07-18 23:35</div>
+</div>
+</body>
+</html>

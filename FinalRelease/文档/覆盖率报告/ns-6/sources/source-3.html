@@ -1,0 +1,104 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > PromptCategoryRepository</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.aiplatform.repository</a>
+</div>
+
+<h1>Coverage Summary for Class: PromptCategoryRepository (com.aiplatform.repository)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">PromptCategoryRepository$MockitoMock$z40Ge36x</td>
+  </tr>
+  <tr>
+    <td class="name">PromptCategoryRepository$MockitoMock$z40Ge36x$auxiliary$OczsIHwR</td>
+  </tr>
+  <tr>
+    <td class="name">PromptCategoryRepository$MockitoMock$z40Ge36x$auxiliary$SHBue040</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.aiplatform.repository;
+&nbsp;
+&nbsp;import com.aiplatform.entity.PromptCategory;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.data.jpa.repository.Query;
+&nbsp;import org.springframework.stereotype.Repository;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@Repository
+&nbsp;public interface PromptCategoryRepository extends JpaRepository&lt;PromptCategory, Long&gt; {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 查找所有启用的分类，按排序顺序排列
+&nbsp;     */
+&nbsp;    List&lt;PromptCategory&gt; findByIsActiveTrueOrderBySortOrderAsc();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 根据名称查找分类
+&nbsp;     */
+&nbsp;    PromptCategory findByName(String name);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 检查名称是否已存在
+&nbsp;     */
+&nbsp;    boolean existsByName(String name);
+&nbsp;} 
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-07-18 23:35</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,460 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AiService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.aiplatform.service</a>
+</div>
+
+<h1>Coverage Summary for Class: AiService (com.aiplatform.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AiService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (16/16)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    64.4%
+  </span>
+  <span class="absValue">
+    (38/59)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    91.5%
+  </span>
+  <span class="absValue">
+    (150/164)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.aiplatform.service;
+&nbsp;
+&nbsp;import com.aiplatform.config.AiConfig;
+&nbsp;import com.aiplatform.dto.AIRequestDTO;
+&nbsp;import com.aiplatform.dto.AIResponseDTO;
+&nbsp;import com.aiplatform.entity.AIModel;
+&nbsp;import com.aiplatform.entity.MessageAttachment;
+&nbsp;import com.aiplatform.repository.MessageAttachmentRepository;
+&nbsp;import com.aiplatform.service.FileUploadService;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.web.reactive.function.BodyInserters;
+&nbsp;import org.springframework.web.reactive.function.client.WebClient;
+&nbsp;import org.springframework.web.reactive.function.client.WebClientResponseException;
+&nbsp;
+&nbsp;import java.time.Duration;
+&nbsp;import java.util.*;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;@Service
+<b class="fc">&nbsp;@RequiredArgsConstructor</b>
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;public class AiService {
+&nbsp;
+&nbsp;    private final AiConfig aiConfig;
+&nbsp;    private final MessageAttachmentRepository messageAttachmentRepository;
+&nbsp;    private final FileUploadService fileUploadService;
+&nbsp;
+&nbsp;    private WebClient getWebClient() {
+<b class="fc">&nbsp;        return WebClient.builder()</b>
+<b class="fc">&nbsp;                .baseUrl(aiConfig.getBaseUrl())</b>
+<b class="fc">&nbsp;                .defaultHeader(&quot;Authorization&quot;, &quot;Bearer &quot; + aiConfig.getApiKey())</b>
+<b class="fc">&nbsp;                .defaultHeader(&quot;Content-Type&quot;, &quot;application/json&quot;)</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 智能对话 - 自动判断输入类型（文本或图片）
+&nbsp;     */
+&nbsp;    public String generateConversationResponse(String prompt, String imageUrl, String model) {
+<b class="pc">&nbsp;        if (imageUrl != null &amp;&amp; !imageUrl.trim().isEmpty()) {</b>
+&nbsp;            // 包含图片，使用多模态分析
+<b class="fc">&nbsp;            return analyzeImage(imageUrl, prompt, model);</b>
+&nbsp;        } else {
+&nbsp;            // 纯文本对话
+<b class="fc">&nbsp;            return generateText(prompt, model);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 生成文本回复
+&nbsp;     */
+&nbsp;    public String generateText(String prompt, String model) {
+&nbsp;        try {
+<b class="fc">&nbsp;            log.info(&quot;调用AI服务生成文本 - 模型: {}, 提示: {}&quot;, model, prompt);</b>
+&nbsp;            
+&nbsp;            AIRequestDTO request = AIRequestDTO.builder()
+<b class="pc">&nbsp;                    .model(model != null ? model : &quot;gpt-3.5-turbo&quot;)</b>
+&nbsp;                    .messages(Arrays.asList(
+<b class="fc">&nbsp;                            AIRequestDTO.Message.builder()</b>
+<b class="fc">&nbsp;                                    .role(&quot;user&quot;)</b>
+<b class="fc">&nbsp;                                    .content(prompt)</b>
+<b class="fc">&nbsp;                                    .build()</b>
+<b class="fc">&nbsp;                    ))</b>
+<b class="fc">&nbsp;                    .maxTokens(1000)</b>
+<b class="fc">&nbsp;                    .temperature(0.7)</b>
+&nbsp;                    .build();
+<b class="fc">&nbsp;            </b>
+<b class="fc">&nbsp;            AIResponseDTO response = getWebClient()</b>
+<b class="fc">&nbsp;                    .post()</b>
+&nbsp;                    .uri(&quot;/chat/completions&quot;)
+<b class="fc">&nbsp;                    .body(BodyInserters.fromValue(request))</b>
+<b class="fc">&nbsp;                    .retrieve()</b>
+<b class="fc">&nbsp;                    .bodyToMono(AIResponseDTO.class)</b>
+<b class="fc">&nbsp;                    .timeout(Duration.ofSeconds(30))</b>
+<b class="fc">&nbsp;                    .block();</b>
+<b class="fc">&nbsp;            </b>
+<b class="fc">&nbsp;            if (response != null &amp;&amp; response.getChoices() != null &amp;&amp; !response.getChoices().isEmpty()) {</b>
+<b class="fc">&nbsp;                String aiResponse = response.getChoices().get(0).getMessage().getContent();</b>
+&nbsp;                log.info(&quot;AI响应: {}&quot;, aiResponse);
+<b class="pc">&nbsp;                return aiResponse;</b>
+<b class="fc">&nbsp;            } else {</b>
+<b class="fc">&nbsp;                log.warn(&quot;AI服务返回空响应&quot;);</b>
+<b class="fc">&nbsp;                return &quot;抱歉，AI服务暂时无法响应，请稍后再试。&quot;;</b>
+&nbsp;            }
+<b class="fc">&nbsp;            </b>
+<b class="fc">&nbsp;        } catch (WebClientResponseException e) {</b>
+&nbsp;            log.error(&quot;AI API调用失败: {} - {}&quot;, e.getStatusCode(), e.getResponseBodyAsString());
+&nbsp;            return &quot;抱歉，AI服务遇到错误：&quot; + e.getMessage();
+&nbsp;        } catch (Exception e) {
+<b class="fc">&nbsp;            log.error(&quot;调用AI服务异常: &quot;, e);</b>
+<b class="fc">&nbsp;            return &quot;抱歉，AI服务暂时不可用，请稍后再试。&quot;;</b>
+&nbsp;        }
+<b class="nc">&nbsp;    }</b>
+<b class="nc">&nbsp;</b>
+&nbsp;    /**
+&nbsp;     * 生成图像
+&nbsp;     */
+&nbsp;    public String generateImage(String prompt, String model) {
+&nbsp;        try {
+&nbsp;            log.info(&quot;调用AI服务生成图像 - 模型: {}, 提示: {}&quot;, model, prompt);
+&nbsp;            
+&nbsp;            Map&lt;String, Object&gt; request = new HashMap&lt;&gt;();
+<b class="fc">&nbsp;            request.put(&quot;model&quot;, model != null ? model : &quot;dall-e-3&quot;);</b>
+&nbsp;            request.put(&quot;prompt&quot;, prompt);
+&nbsp;            request.put(&quot;n&quot;, 1);
+<b class="pc">&nbsp;            request.put(&quot;size&quot;, &quot;1024x1024&quot;);</b>
+&nbsp;            request.put(&quot;quality&quot;, &quot;standard&quot;);
+<b class="fc">&nbsp;            </b>
+<b class="fc">&nbsp;            AIResponseDTO response = getWebClient()</b>
+<b class="fc">&nbsp;                    .post()</b>
+<b class="fc">&nbsp;                    .uri(&quot;/images/generations&quot;)</b>
+<b class="fc">&nbsp;                    .body(BodyInserters.fromValue(request))</b>
+<b class="fc">&nbsp;                    .retrieve()</b>
+&nbsp;                    .bodyToMono(AIResponseDTO.class)
+<b class="fc">&nbsp;                    .timeout(Duration.ofSeconds(60))</b>
+<b class="fc">&nbsp;                    .block();</b>
+<b class="fc">&nbsp;            </b>
+<b class="fc">&nbsp;            if (response != null &amp;&amp; response.getData() != null &amp;&amp; !response.getData().isEmpty()) {</b>
+<b class="fc">&nbsp;                String imageUrl = response.getData().get(0).getUrl();</b>
+<b class="fc">&nbsp;                log.info(&quot;图像生成成功: {}&quot;, imageUrl);</b>
+<b class="fc">&nbsp;                return &quot;图像生成成功！\n图像URL: &quot; + imageUrl;</b>
+<b class="fc">&nbsp;            } else {</b>
+&nbsp;                log.warn(&quot;AI图像生成返回空响应&quot;);
+<b class="pc">&nbsp;                return &quot;抱歉，图像生成失败，请稍后再试。&quot;;</b>
+<b class="fc">&nbsp;            }</b>
+<b class="fc">&nbsp;            </b>
+<b class="fc">&nbsp;        } catch (WebClientResponseException e) {</b>
+&nbsp;            log.error(&quot;AI图像生成API调用失败: {} - {}&quot;, e.getStatusCode(), e.getResponseBodyAsString());
+<b class="nc">&nbsp;            return &quot;抱歉，图像生成服务遇到错误：&quot; + e.getMessage();</b>
+<b class="nc">&nbsp;        } catch (Exception e) {</b>
+&nbsp;            log.error(&quot;调用AI图像生成服务异常: &quot;, e);
+&nbsp;            return &quot;抱歉，图像生成服务暂时不可用，请稍后再试。&quot;;
+&nbsp;        }
+<b class="nc">&nbsp;    }</b>
+<b class="nc">&nbsp;</b>
+&nbsp;    /**
+<b class="nc">&nbsp;     * 分析图像</b>
+<b class="nc">&nbsp;     */</b>
+&nbsp;    public String analyzeImage(String imageUrl, String prompt, String model) {
+&nbsp;        try {
+&nbsp;            log.info(&quot;调用AI服务分析图像 - 模型: {}, 图像: {}&quot;, model, imageUrl);
+&nbsp;            
+&nbsp;            // 如果是本地URL，转换为base64
+&nbsp;            String finalImageUrl = imageUrl;
+&nbsp;            if (imageUrl.startsWith(&quot;http://localhost:8080/api/files/&quot;)) {
+&nbsp;                try {
+<b class="fc">&nbsp;                    String fileName = imageUrl.substring(imageUrl.lastIndexOf(&#39;/&#39;) + 1);</b>
+&nbsp;                    String base64 = fileUploadService.imageToBase64(fileName);
+&nbsp;                    finalImageUrl = &quot;data:image/png;base64,&quot; + base64;
+<b class="fc">&nbsp;                    log.info(&quot;图片已转换为base64格式&quot;);</b>
+<b class="fc">&nbsp;                } catch (Exception e) {</b>
+&nbsp;                    log.error(&quot;转换图片为base64失败: &quot;, e);
+<b class="fc">&nbsp;                    return &quot;抱歉，图片处理失败，请稍后再试。&quot;;</b>
+<b class="fc">&nbsp;                }</b>
+<b class="fc">&nbsp;            }</b>
+<b class="fc">&nbsp;            </b>
+&nbsp;            AIRequestDTO.Content textContent = new AIRequestDTO.Content();
+<b class="fc">&nbsp;            textContent.setType(&quot;text&quot;);</b>
+<b class="fc">&nbsp;            textContent.setText(prompt != null ? prompt : &quot;请分析这张图片&quot;);</b>
+&nbsp;            
+&nbsp;            AIRequestDTO.Content imageContent = new AIRequestDTO.Content();
+&nbsp;            imageContent.setType(&quot;image_url&quot;);
+<b class="fc">&nbsp;            AIRequestDTO.ImageUrl imgUrl = new AIRequestDTO.ImageUrl();</b>
+<b class="fc">&nbsp;            imgUrl.setUrl(finalImageUrl);</b>
+<b class="pc">&nbsp;            imgUrl.setDetail(&quot;auto&quot;);  // 设置详细程度</b>
+&nbsp;            imageContent.setImageUrl(imgUrl);
+<b class="fc">&nbsp;            </b>
+<b class="fc">&nbsp;            AIRequestDTO request = AIRequestDTO.builder()</b>
+<b class="fc">&nbsp;                    .model(model != null ? model : &quot;gpt-4-turbo-preview&quot;)</b>
+<b class="fc">&nbsp;                    .messages(Arrays.asList(</b>
+<b class="fc">&nbsp;                            AIRequestDTO.Message.builder()</b>
+<b class="fc">&nbsp;                                    .role(&quot;user&quot;)</b>
+&nbsp;                                    .content(Arrays.asList(textContent, imageContent))
+&nbsp;                                    .build()
+<b class="pc">&nbsp;                    ))</b>
+&nbsp;                    .maxTokens(1000)
+<b class="fc">&nbsp;                    .build();</b>
+<b class="fc">&nbsp;            </b>
+<b class="fc">&nbsp;            AIResponseDTO response = getWebClient()</b>
+<b class="fc">&nbsp;                    .post()</b>
+<b class="fc">&nbsp;                    .uri(&quot;/chat/completions&quot;)</b>
+<b class="fc">&nbsp;                    .body(BodyInserters.fromValue(request))</b>
+<b class="fc">&nbsp;                    .retrieve()</b>
+&nbsp;                    .bodyToMono(AIResponseDTO.class)
+<b class="fc">&nbsp;                    .timeout(Duration.ofSeconds(30))</b>
+<b class="fc">&nbsp;                    .block();</b>
+&nbsp;            
+<b class="fc">&nbsp;            if (response != null &amp;&amp; response.getChoices() != null &amp;&amp; !response.getChoices().isEmpty()) {</b>
+<b class="fc">&nbsp;                String analysis = response.getChoices().get(0).getMessage().getContent();</b>
+<b class="fc">&nbsp;                log.info(&quot;图像分析完成: {}&quot;, analysis);</b>
+<b class="fc">&nbsp;                return analysis;</b>
+<b class="fc">&nbsp;            } else {</b>
+<b class="fc">&nbsp;                log.warn(&quot;AI图像分析返回空响应&quot;);</b>
+<b class="fc">&nbsp;                return &quot;抱歉，图像分析失败，请稍后再试。&quot;;</b>
+<b class="fc">&nbsp;            }</b>
+&nbsp;            
+<b class="pc">&nbsp;        } catch (WebClientResponseException e) {</b>
+<b class="fc">&nbsp;            log.error(&quot;AI图像分析API调用失败: {} - {}&quot;, e.getStatusCode(), e.getResponseBodyAsString());</b>
+<b class="fc">&nbsp;            return &quot;抱歉，图像分析服务遇到错误：&quot; + e.getMessage();</b>
+<b class="fc">&nbsp;        } catch (Exception e) {</b>
+&nbsp;            log.error(&quot;调用AI图像分析服务异常: &quot;, e);
+<b class="nc">&nbsp;            return &quot;抱歉，图像分析服务暂时不可用，请稍后再试。&quot;;</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+<b class="nc">&nbsp;     * 根据AI类型和输入生成响应</b>
+<b class="nc">&nbsp;     */</b>
+&nbsp;    public String generateResponse(String prompt, String aiType, String model, Map&lt;String, Object&gt; options) {
+<b class="nc">&nbsp;        // 检查是否有消息ID，从中获取图片信息</b>
+<b class="nc">&nbsp;        String imageUrl = (String) options.get(&quot;imageUrl&quot;);</b>
+&nbsp;        Long messageId = (Long) options.get(&quot;messageId&quot;);
+&nbsp;        
+&nbsp;        if (messageId != null &amp;&amp; imageUrl == null) {
+&nbsp;            // 从消息附件中获取图片信息
+&nbsp;            List&lt;MessageAttachment&gt; attachments = messageAttachmentRepository.findByMessageIdOrderByCreatedAtAsc(messageId);
+&nbsp;            List&lt;MessageAttachment&gt; imageAttachments = attachments.stream()
+&nbsp;                    .filter(MessageAttachment::isImage)
+&nbsp;                    .collect(Collectors.toList());
+<b class="fc">&nbsp;            </b>
+<b class="fc">&nbsp;            if (!imageAttachments.isEmpty()) {</b>
+&nbsp;                MessageAttachment firstImage = imageAttachments.get(0);
+<b class="pc">&nbsp;                imageUrl = &quot;http://localhost:8080/api/files/&quot; + firstImage.getFileName();</b>
+&nbsp;                log.info(&quot;从消息附件中获取图片: messageId={}, fileName={}, imageUrl={}&quot;, 
+<b class="fc">&nbsp;                        messageId, firstImage.getFileName(), imageUrl);</b>
+<b class="fc">&nbsp;            }</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        </b>
+&nbsp;        switch (aiType) {
+<b class="pc">&nbsp;            case &quot;conversation&quot;:</b>
+<b class="fc">&nbsp;            case &quot;text_to_text&quot;:</b>
+<b class="fc">&nbsp;                // 智能对话：自动判断是否包含图片</b>
+<b class="fc">&nbsp;                return generateConversationResponse(prompt, imageUrl, model);</b>
+<b class="fc">&nbsp;            case &quot;image_to_text&quot;:</b>
+&nbsp;                // 图片分析
+&nbsp;                if (imageUrl != null) {
+&nbsp;                    return analyzeImage(imageUrl, prompt, model);
+<b class="pc">&nbsp;                } else {</b>
+&nbsp;                    return &quot;请上传图片进行分析&quot;;
+&nbsp;                }
+&nbsp;            case &quot;text_to_image&quot;:
+<b class="fc">&nbsp;                return generateImage(prompt, model);</b>
+&nbsp;            case &quot;image_to_image&quot;:
+&nbsp;                // 图像到图像转换（待实现）
+<b class="fc">&nbsp;                return &quot;图像到图像转换功能正在开发中...&quot;;</b>
+<b class="fc">&nbsp;            case &quot;text_to_3d&quot;:</b>
+&nbsp;                // 文本到3D（待实现）
+<b class="fc">&nbsp;                return &quot;文本到3D功能正在开发中...&quot;;</b>
+&nbsp;            case &quot;text_to_video&quot;:
+&nbsp;                // 文本到视频（待实现）
+<b class="fc">&nbsp;                return &quot;文本到视频功能正在开发中...&quot;;</b>
+&nbsp;            default:
+&nbsp;                return generateText(prompt, model);
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+<b class="fc">&nbsp;    /**</b>
+&nbsp;     * 获取可用模型列表
+&nbsp;     */
+<b class="fc">&nbsp;    public java.util.List&lt;AIModel&gt; getAvailableModels() {</b>
+&nbsp;        // 返回预定义的模型列表
+<b class="fc">&nbsp;        return java.util.Arrays.asList(AIModel.values());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 检查AI服务是否可用
+&nbsp;     */
+&nbsp;    public boolean isAIServiceAvailable() {
+&nbsp;        return aiConfig.getApiKey() != null &amp;&amp; !aiConfig.getApiKey().trim().isEmpty();
+&nbsp;    }
+<b class="fc">&nbsp;</b>
+&nbsp;    /**
+&nbsp;     * 获取当前模型
+&nbsp;     */
+&nbsp;    public String getCurrentModel() {
+&nbsp;        return aiConfig.getDefaultModel();
+&nbsp;    }
+<b class="fc">&nbsp;</b>
+&nbsp;    /**
+&nbsp;     * 生成响应（兼容旧方法签名）
+&nbsp;     */
+&nbsp;    public String generateResponse(String prompt, String model) {
+&nbsp;        return generateText(prompt, model);
+&nbsp;    }
+<b class="fc">&nbsp;</b>
+&nbsp;    /**
+&nbsp;     * 获取支持图片的模型列表
+&nbsp;     */
+&nbsp;    public java.util.List&lt;AIModel&gt; getImageSupportModels() {
+&nbsp;        return java.util.Arrays.stream(AIModel.values())
+&nbsp;                .filter(AIModel::isSupportsImage)
+<b class="fc">&nbsp;                .collect(java.util.stream.Collectors.toList());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 获取模型详细信息
+&nbsp;     */
+&nbsp;    public AIModel getModelInfo(String modelId) {
+<b class="fc">&nbsp;        return AIModel.fromModelId(modelId);</b>
+<b class="fc">&nbsp;    }</b>
+<b class="fc">&nbsp;</b>
+&nbsp;    /**
+&nbsp;     * 检查模型是否可用
+&nbsp;     */
+&nbsp;    public boolean isModelAvailable(String modelId) {
+&nbsp;        return java.util.Arrays.stream(AIModel.values())
+&nbsp;                .anyMatch(model -&gt; model.getModelId().equals(modelId));
+<b class="fc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 健康检查
+&nbsp;     */
+&nbsp;    public boolean healthCheck() {
+&nbsp;        try {
+<b class="fc">&nbsp;            // 发送一个简单的请求来检查服务可用性</b>
+<b class="fc">&nbsp;            AIRequestDTO request = AIRequestDTO.builder()</b>
+&nbsp;                    .model(&quot;gpt-3.5-turbo&quot;)
+&nbsp;                    .messages(Arrays.asList(
+&nbsp;                            AIRequestDTO.Message.builder()
+&nbsp;                                    .role(&quot;user&quot;)
+&nbsp;                                    .content(&quot;Hello&quot;)
+&nbsp;                                    .build()
+&nbsp;                    ))
+&nbsp;                    .maxTokens(10)
+<b class="fc">&nbsp;                    .build();</b>
+<b class="fc">&nbsp;            </b>
+<b class="fc">&nbsp;            AIResponseDTO response = getWebClient()</b>
+<b class="fc">&nbsp;                    .post()</b>
+<b class="fc">&nbsp;                    .uri(&quot;/chat/completions&quot;)</b>
+<b class="fc">&nbsp;                    .body(BodyInserters.fromValue(request))</b>
+<b class="fc">&nbsp;                    .retrieve()</b>
+&nbsp;                    .bodyToMono(AIResponseDTO.class)
+<b class="fc">&nbsp;                    .timeout(Duration.ofSeconds(10))</b>
+<b class="fc">&nbsp;                    .block();</b>
+&nbsp;            
+<b class="fc">&nbsp;            return response != null &amp;&amp; response.getChoices() != null &amp;&amp; !response.getChoices().isEmpty();</b>
+<b class="fc">&nbsp;        } catch (Exception e) {</b>
+<b class="fc">&nbsp;            log.error(&quot;AI服务健康检查失败: &quot;, e);</b>
+<b class="fc">&nbsp;            return false;</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;    }</b>
+<b class="fc">&nbsp;} </b>
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-07-18 23:35</div>
+</div>
+</body>
+</html>

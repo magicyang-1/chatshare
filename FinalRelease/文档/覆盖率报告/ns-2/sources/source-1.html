@@ -1,0 +1,394 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AIController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.aiplatform.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: AIController (com.aiplatform.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AIController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (16/16)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (135/135)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.aiplatform.controller;
+&nbsp;
+&nbsp;import com.aiplatform.service.AiService;
+&nbsp;import com.aiplatform.service.ChatService;
+&nbsp;import io.swagger.v3.oas.annotations.Operation;
+&nbsp;import io.swagger.v3.oas.annotations.tags.Tag;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;@RestController
+&nbsp;@RequestMapping(&quot;/ai&quot;)
+<b class="fc">&nbsp;@RequiredArgsConstructor</b>
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;@Tag(name = &quot;AI服务管理&quot;, description = &quot;AI服务相关接口&quot;)
+&nbsp;public class AIController {
+&nbsp;
+&nbsp;    private final AiService aiService;
+&nbsp;    private final ChatService chatService;
+&nbsp;
+&nbsp;    @Operation(summary = &quot;获取AI服务状态&quot;, description = &quot;检查AI服务是否可用&quot;)
+&nbsp;    @GetMapping(&quot;/status&quot;)
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; getAIStatus() {
+&nbsp;        try {
+<b class="fc">&nbsp;            log.info(&quot;检查AI服务状态&quot;);</b>
+&nbsp;            
+<b class="fc">&nbsp;            boolean isAvailable = aiService.isAIServiceAvailable();</b>
+<b class="fc">&nbsp;            String currentModel = aiService.getCurrentModel();</b>
+&nbsp;            
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            response.put(&quot;success&quot;, true);</b>
+<b class="fc">&nbsp;            response.put(&quot;available&quot;, isAvailable);</b>
+<b class="fc">&nbsp;            response.put(&quot;model&quot;, currentModel);</b>
+<b class="fc">&nbsp;            response.put(&quot;service&quot;, isAvailable ? &quot;OpenRouter API&quot; : &quot;本地回复模式&quot;);</b>
+<b class="fc">&nbsp;            response.put(&quot;message&quot;, isAvailable ? &quot;AI服务正常&quot; : &quot;AI API未配置，使用本地回复&quot;);</b>
+&nbsp;            
+<b class="fc">&nbsp;            return ResponseEntity.ok(response);</b>
+&nbsp;            
+&nbsp;        } catch (Exception e) {
+<b class="fc">&nbsp;            log.error(&quot;获取AI服务状态异常: &quot;, e);</b>
+&nbsp;            
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            response.put(&quot;success&quot;, false);</b>
+<b class="fc">&nbsp;            response.put(&quot;available&quot;, false);</b>
+<b class="fc">&nbsp;            response.put(&quot;message&quot;, &quot;检查AI服务状态失败&quot;);</b>
+<b class="fc">&nbsp;            response.put(&quot;error&quot;, e.getMessage());</b>
+&nbsp;            
+<b class="fc">&nbsp;            return ResponseEntity.internalServerError().body(response);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(summary = &quot;测试AI回复&quot;, description = &quot;测试AI服务是否正常工作&quot;)
+&nbsp;    @PostMapping(&quot;/test&quot;)
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; testAI(@RequestBody Map&lt;String, Object&gt; request) {
+&nbsp;        try {
+<b class="fc">&nbsp;            String testMessage = (String) request.getOrDefault(&quot;message&quot;, &quot;你好&quot;);</b>
+<b class="fc">&nbsp;            log.info(&quot;测试AI回复: {}&quot;, testMessage);</b>
+&nbsp;            
+<b class="fc">&nbsp;            String response = aiService.generateResponse(testMessage, null);</b>
+<b class="fc">&nbsp;            boolean isAvailable = aiService.isAIServiceAvailable();</b>
+&nbsp;            
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; result = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            result.put(&quot;success&quot;, true);</b>
+<b class="fc">&nbsp;            result.put(&quot;response&quot;, response);</b>
+<b class="fc">&nbsp;            result.put(&quot;available&quot;, isAvailable);</b>
+<b class="fc">&nbsp;            result.put(&quot;model&quot;, aiService.getCurrentModel());</b>
+<b class="fc">&nbsp;            result.put(&quot;mode&quot;, isAvailable ? &quot;API&quot; : &quot;本地&quot;);</b>
+&nbsp;            
+<b class="fc">&nbsp;            return ResponseEntity.ok(result);</b>
+&nbsp;            
+&nbsp;        } catch (Exception e) {
+<b class="fc">&nbsp;            log.error(&quot;测试AI回复异常: &quot;, e);</b>
+&nbsp;            
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; result = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            result.put(&quot;success&quot;, false);</b>
+<b class="fc">&nbsp;            result.put(&quot;message&quot;, &quot;AI测试失败&quot;);</b>
+<b class="fc">&nbsp;            result.put(&quot;error&quot;, e.getMessage());</b>
+&nbsp;            
+<b class="fc">&nbsp;            return ResponseEntity.internalServerError().body(result);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(summary = &quot;获取AI配置信息&quot;, description = &quot;获取当前AI服务的配置信息&quot;)
+&nbsp;    @GetMapping(&quot;/config&quot;)
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; getAIConfig() {
+&nbsp;        try {
+<b class="fc">&nbsp;            log.info(&quot;获取AI配置信息&quot;);</b>
+&nbsp;            
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; config = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            config.put(&quot;success&quot;, true);</b>
+<b class="fc">&nbsp;            config.put(&quot;model&quot;, aiService.getCurrentModel());</b>
+<b class="fc">&nbsp;            config.put(&quot;available&quot;, aiService.isAIServiceAvailable());</b>
+<b class="fc">&nbsp;            config.put(&quot;provider&quot;, &quot;OpenRouter&quot;);</b>
+<b class="fc">&nbsp;            config.put(&quot;features&quot;, new String[]{</b>
+&nbsp;                &quot;文本对话&quot;,
+&nbsp;                &quot;上下文理解&quot;,
+&nbsp;                &quot;多轮对话&quot;
+&nbsp;            });
+&nbsp;            
+<b class="fc">&nbsp;            if (!aiService.isAIServiceAvailable()) {</b>
+<b class="fc">&nbsp;                config.put(&quot;notice&quot;, &quot;AI API未配置，当前使用本地回复模式。要启用完整AI功能，请在环境变量中配置有效的OpenRouter API密钥。&quot;);</b>
+&nbsp;            }
+&nbsp;            
+<b class="fc">&nbsp;            return ResponseEntity.ok(config);</b>
+&nbsp;            
+&nbsp;        } catch (Exception e) {
+<b class="fc">&nbsp;            log.error(&quot;获取AI配置信息异常: &quot;, e);</b>
+&nbsp;            
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; result = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            result.put(&quot;success&quot;, false);</b>
+<b class="fc">&nbsp;            result.put(&quot;message&quot;, &quot;获取AI配置失败&quot;);</b>
+<b class="fc">&nbsp;            result.put(&quot;error&quot;, e.getMessage());</b>
+&nbsp;            
+<b class="fc">&nbsp;            return ResponseEntity.internalServerError().body(result);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(summary = &quot;检查聊天服务状态&quot;, description = &quot;检查聊天服务的AI功能状态&quot;)
+&nbsp;    @GetMapping(&quot;/chat/status&quot;)
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; getChatAIStatus() {
+&nbsp;        try {
+<b class="fc">&nbsp;            log.info(&quot;检查聊天服务AI状态&quot;);</b>
+&nbsp;            
+<b class="fc">&nbsp;            boolean isAvailable = chatService.isAIServiceAvailable();</b>
+<b class="fc">&nbsp;            String currentModel = chatService.getCurrentAIModel();</b>
+&nbsp;            
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            response.put(&quot;success&quot;, true);</b>
+<b class="fc">&nbsp;            response.put(&quot;aiEnabled&quot;, isAvailable);</b>
+<b class="fc">&nbsp;            response.put(&quot;model&quot;, currentModel);</b>
+<b class="fc">&nbsp;            response.put(&quot;chatAIStatus&quot;, isAvailable ? &quot;启用&quot; : &quot;本地模式&quot;);</b>
+&nbsp;            
+<b class="fc">&nbsp;            return ResponseEntity.ok(response);</b>
+&nbsp;            
+&nbsp;        } catch (Exception e) {
+<b class="fc">&nbsp;            log.error(&quot;检查聊天服务AI状态异常: &quot;, e);</b>
+&nbsp;            
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            response.put(&quot;success&quot;, false);</b>
+<b class="fc">&nbsp;            response.put(&quot;message&quot;, &quot;检查聊天AI状态失败&quot;);</b>
+<b class="fc">&nbsp;            response.put(&quot;error&quot;, e.getMessage());</b>
+&nbsp;            
+<b class="fc">&nbsp;            return ResponseEntity.internalServerError().body(response);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(summary = &quot;获取可用AI模型列表&quot;, description = &quot;获取所有支持的AI模型&quot;)
+&nbsp;    @GetMapping(&quot;/models&quot;)
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; getAvailableModels() {
+&nbsp;        try {
+<b class="fc">&nbsp;            log.info(&quot;获取可用AI模型列表&quot;);</b>
+&nbsp;            
+<b class="fc">&nbsp;            var modelEnums = aiService.getAvailableModels();</b>
+&nbsp;            
+&nbsp;            // 转换为前端友好的格式
+<b class="fc">&nbsp;            var models = new java.util.ArrayList&lt;Map&lt;String, Object&gt;&gt;();</b>
+<b class="fc">&nbsp;            for (var model : modelEnums) {</b>
+<b class="fc">&nbsp;                Map&lt;String, Object&gt; modelMap = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;                modelMap.put(&quot;modelId&quot;, model.getModelId());</b>
+<b class="fc">&nbsp;                modelMap.put(&quot;displayName&quot;, model.getDisplayName());</b>
+<b class="fc">&nbsp;                modelMap.put(&quot;description&quot;, model.getDescription());</b>
+<b class="fc">&nbsp;                modelMap.put(&quot;supportsText&quot;, model.isSupportsText());</b>
+<b class="fc">&nbsp;                modelMap.put(&quot;supportsImage&quot;, model.isSupportsImage());</b>
+<b class="fc">&nbsp;                modelMap.put(&quot;inputPrice&quot;, model.getInputPrice());</b>
+<b class="fc">&nbsp;                modelMap.put(&quot;outputPrice&quot;, model.getOutputPrice());</b>
+<b class="fc">&nbsp;                models.add(modelMap);</b>
+&nbsp;            }
+&nbsp;            
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            response.put(&quot;success&quot;, true);</b>
+<b class="fc">&nbsp;            response.put(&quot;models&quot;, models);</b>
+<b class="fc">&nbsp;            response.put(&quot;count&quot;, models.size());</b>
+&nbsp;            
+<b class="fc">&nbsp;            return ResponseEntity.ok(response);</b>
+&nbsp;            
+&nbsp;        } catch (Exception e) {
+<b class="fc">&nbsp;            log.error(&quot;获取AI模型列表异常: &quot;, e);</b>
+&nbsp;            
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            response.put(&quot;success&quot;, false);</b>
+<b class="fc">&nbsp;            response.put(&quot;message&quot;, &quot;获取模型列表失败&quot;);</b>
+<b class="fc">&nbsp;            response.put(&quot;error&quot;, e.getMessage());</b>
+&nbsp;            
+<b class="fc">&nbsp;            return ResponseEntity.internalServerError().body(response);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(summary = &quot;获取支持图片的AI模型&quot;, description = &quot;获取支持图片输入的AI模型列表&quot;)
+&nbsp;    @GetMapping(&quot;/models/image-support&quot;)
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; getImageSupportModels() {
+&nbsp;        try {
+<b class="fc">&nbsp;            log.info(&quot;获取支持图片的AI模型列表&quot;);</b>
+&nbsp;            
+<b class="fc">&nbsp;            var models = aiService.getImageSupportModels();</b>
+&nbsp;            
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            response.put(&quot;success&quot;, true);</b>
+<b class="fc">&nbsp;            response.put(&quot;models&quot;, models);</b>
+<b class="fc">&nbsp;            response.put(&quot;count&quot;, models.size());</b>
+&nbsp;            
+<b class="fc">&nbsp;            return ResponseEntity.ok(response);</b>
+&nbsp;            
+&nbsp;        } catch (Exception e) {
+<b class="fc">&nbsp;            log.error(&quot;获取图片支持模型列表异常: &quot;, e);</b>
+&nbsp;            
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            response.put(&quot;success&quot;, false);</b>
+<b class="fc">&nbsp;            response.put(&quot;message&quot;, &quot;获取图片支持模型列表失败&quot;);</b>
+<b class="fc">&nbsp;            response.put(&quot;error&quot;, e.getMessage());</b>
+&nbsp;            
+<b class="fc">&nbsp;            return ResponseEntity.internalServerError().body(response);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(summary = &quot;获取模型详细信息&quot;, description = &quot;获取指定模型的详细信息&quot;)
+&nbsp;    @GetMapping(&quot;/models/{modelId}&quot;)
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; getModelInfo(@PathVariable String modelId) {
+&nbsp;        try {
+<b class="fc">&nbsp;            log.info(&quot;获取模型信息: {}&quot;, modelId);</b>
+&nbsp;            
+<b class="fc">&nbsp;            var model = aiService.getModelInfo(modelId);</b>
+<b class="fc">&nbsp;            if (model == null) {</b>
+<b class="fc">&nbsp;                Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;                response.put(&quot;success&quot;, false);</b>
+<b class="fc">&nbsp;                response.put(&quot;message&quot;, &quot;模型不存在&quot;);</b>
+<b class="fc">&nbsp;                return ResponseEntity.notFound().build();</b>
+&nbsp;            }
+&nbsp;            
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            response.put(&quot;success&quot;, true);</b>
+<b class="fc">&nbsp;            response.put(&quot;model&quot;, model);</b>
+&nbsp;            
+<b class="fc">&nbsp;            return ResponseEntity.ok(response);</b>
+&nbsp;            
+&nbsp;        } catch (Exception e) {
+<b class="fc">&nbsp;            log.error(&quot;获取模型信息异常: &quot;, e);</b>
+&nbsp;            
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            response.put(&quot;success&quot;, false);</b>
+<b class="fc">&nbsp;            response.put(&quot;message&quot;, &quot;获取模型信息失败&quot;);</b>
+<b class="fc">&nbsp;            response.put(&quot;error&quot;, e.getMessage());</b>
+&nbsp;            
+<b class="fc">&nbsp;            return ResponseEntity.internalServerError().body(response);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(summary = &quot;验证模型可用性&quot;, description = &quot;检查指定模型是否可用&quot;)
+&nbsp;    @GetMapping(&quot;/models/{modelId}/available&quot;)
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; checkModelAvailability(@PathVariable String modelId) {
+&nbsp;        try {
+<b class="fc">&nbsp;            log.info(&quot;检查模型可用性: {}&quot;, modelId);</b>
+&nbsp;            
+<b class="fc">&nbsp;            boolean available = aiService.isModelAvailable(modelId);</b>
+&nbsp;            
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            response.put(&quot;success&quot;, true);</b>
+<b class="fc">&nbsp;            response.put(&quot;modelId&quot;, modelId);</b>
+<b class="fc">&nbsp;            response.put(&quot;available&quot;, available);</b>
+<b class="fc">&nbsp;            response.put(&quot;message&quot;, available ? &quot;模型可用&quot; : &quot;模型不可用&quot;);</b>
+&nbsp;            
+<b class="fc">&nbsp;            return ResponseEntity.ok(response);</b>
+&nbsp;            
+&nbsp;        } catch (Exception e) {
+<b class="fc">&nbsp;            log.error(&quot;检查模型可用性异常: &quot;, e);</b>
+&nbsp;            
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            response.put(&quot;success&quot;, false);</b>
+<b class="fc">&nbsp;            response.put(&quot;message&quot;, &quot;检查模型可用性失败&quot;);</b>
+<b class="fc">&nbsp;            response.put(&quot;error&quot;, e.getMessage());</b>
+&nbsp;            
+<b class="fc">&nbsp;            return ResponseEntity.internalServerError().body(response);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;} 
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-07-18 23:35</div>
+</div>
+</body>
+</html>

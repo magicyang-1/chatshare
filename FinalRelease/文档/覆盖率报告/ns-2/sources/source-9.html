@@ -1,0 +1,668 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > PromptTemplateController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.aiplatform.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: PromptTemplateController (com.aiplatform.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PromptTemplateController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (16/16)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    73%
+  </span>
+  <span class="absValue">
+    (54/74)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    91.2%
+  </span>
+  <span class="absValue">
+    (219/240)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.aiplatform.controller;
+&nbsp;
+&nbsp;import com.aiplatform.entity.PromptCategory;
+&nbsp;import com.aiplatform.entity.PromptTemplate;
+&nbsp;import com.aiplatform.entity.User;
+&nbsp;import com.aiplatform.dto.PromptTemplateDTO;
+&nbsp;import com.aiplatform.security.JwtTokenProvider;
+&nbsp;import com.aiplatform.service.PromptTemplateService;
+&nbsp;import com.aiplatform.service.UserService;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.data.domain.Page;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;@RestController
+&nbsp;@RequestMapping(&quot;/prompt-templates&quot;)
+<b class="fc">&nbsp;@RequiredArgsConstructor</b>
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;public class PromptTemplateController {
+&nbsp;
+&nbsp;    private final PromptTemplateService promptTemplateService;
+&nbsp;    private final UserService userService;
+&nbsp;    private final JwtTokenProvider jwtTokenProvider;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 获取所有分类
+&nbsp;     */
+&nbsp;    @GetMapping(&quot;/categories&quot;)
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; getCategories() {
+&nbsp;        try {
+<b class="fc">&nbsp;            List&lt;PromptCategory&gt; categories = promptTemplateService.getAllCategories();</b>
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            response.put(&quot;success&quot;, true);</b>
+<b class="fc">&nbsp;            response.put(&quot;categories&quot;, categories);</b>
+<b class="fc">&nbsp;            return ResponseEntity.ok(response);</b>
+&nbsp;        } catch (Exception e) {
+<b class="fc">&nbsp;            log.error(&quot;获取分类失败&quot;, e);</b>
+<b class="fc">&nbsp;            return ResponseEntity.badRequest().body(</b>
+<b class="fc">&nbsp;                Map.of(&quot;error&quot;, &quot;获取分类失败: &quot; + e.getMessage())</b>
+&nbsp;            );
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 获取模板列表
+&nbsp;     */
+&nbsp;    @GetMapping
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; getTemplates(
+&nbsp;            @RequestHeader(value = &quot;Authorization&quot;, required = false) String authHeader,
+&nbsp;            @RequestParam(value = &quot;categoryId&quot;, required = false) Long categoryId,
+&nbsp;            @RequestParam(value = &quot;type&quot;, required = false) String type,
+&nbsp;            @RequestParam(value = &quot;keyword&quot;, required = false) String keyword,
+&nbsp;            @RequestParam(value = &quot;page&quot;, defaultValue = &quot;0&quot;) int page,
+&nbsp;            @RequestParam(value = &quot;size&quot;, defaultValue = &quot;20&quot;) int size) {
+&nbsp;        
+&nbsp;        try {
+&nbsp;            // 获取用户ID（如果提供了认证头）
+<b class="fc">&nbsp;            Long userId = null;</b>
+<b class="fc">&nbsp;            if (authHeader != null &amp;&amp; authHeader.startsWith(&quot;Bearer &quot;)) {</b>
+&nbsp;                try {
+<b class="fc">&nbsp;                    String token = authHeader.substring(7);</b>
+<b class="fc">&nbsp;                    log.info(&quot;解析token: {}&quot;, token.substring(0, Math.min(20, token.length())) + &quot;...&quot;);</b>
+<b class="fc">&nbsp;                    String email = jwtTokenProvider.getEmailFromToken(token);</b>
+<b class="fc">&nbsp;                    log.info(&quot;从token获取到邮箱: {}&quot;, email);</b>
+<b class="fc">&nbsp;                    Optional&lt;User&gt; userOpt = userService.findByEmail(email);</b>
+<b class="fc">&nbsp;                    if (userOpt.isPresent()) {</b>
+<b class="fc">&nbsp;                        userId = userOpt.get().getId();</b>
+<b class="fc">&nbsp;                        log.info(&quot;找到用户ID: {}&quot;, userId);</b>
+&nbsp;                    } else {
+<b class="fc">&nbsp;                        log.warn(&quot;未找到用户: {}&quot;, email);</b>
+&nbsp;                    }
+&nbsp;                } catch (Exception e) {
+<b class="fc">&nbsp;                    log.warn(&quot;解析用户token失败，将以游客身份获取模板: {}&quot;, e.getMessage());</b>
+&nbsp;                }
+&nbsp;            } else {
+<b class="fc">&nbsp;                log.info(&quot;未提供认证头，将以游客身份获取模板&quot;);</b>
+&nbsp;            }
+&nbsp;            
+&nbsp;            Page&lt;PromptTemplate&gt; templates;
+<b class="pc">&nbsp;            if (categoryId != null &amp;&amp; categoryId &gt; 0) {</b>
+<b class="fc">&nbsp;                templates = promptTemplateService.getTemplatesByCategory(categoryId, page, size);</b>
+<b class="fc">&nbsp;            } else if (keyword != null &amp;&amp; !keyword.trim().isEmpty()) {</b>
+<b class="fc">&nbsp;                templates = promptTemplateService.searchTemplates(keyword, categoryId, page, size);</b>
+<b class="fc">&nbsp;            } else if (&quot;OFFICIAL&quot;.equals(type)) {</b>
+<b class="fc">&nbsp;                templates = promptTemplateService.getOfficialTemplates(page, size);</b>
+<b class="pc">&nbsp;            } else if (&quot;USER&quot;.equals(type)) {</b>
+<b class="nc">&nbsp;                templates = promptTemplateService.getUserTemplates(page, size);</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                templates = promptTemplateService.getTemplatesByCategory(null, page, size);</b>
+&nbsp;            }
+&nbsp;            
+&nbsp;            // 使用包含用户ID的convertToDTO方法
+<b class="fc">&nbsp;            List&lt;PromptTemplateDTO&gt; templateDTOs = promptTemplateService.convertToDTO(templates.getContent(), userId);</b>
+&nbsp;            
+&nbsp;            // 添加调试日志
+<b class="fc">&nbsp;            log.info(&quot;返回模板数量: {}, 用户ID: {}&quot;, templateDTOs.size(), userId);</b>
+<b class="fc">&nbsp;            templateDTOs.forEach(dto -&gt; {</b>
+<b class="fc">&nbsp;                log.info(&quot;模板 {} ({}): liked={}, likeCount={}&quot;, dto.getId(), dto.getTitle(), dto.getLiked(), dto.getLikeCount());</b>
+&nbsp;            });
+&nbsp;            
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            response.put(&quot;success&quot;, true);</b>
+<b class="fc">&nbsp;            response.put(&quot;templates&quot;, templateDTOs);</b>
+<b class="fc">&nbsp;            response.put(&quot;totalPages&quot;, templates.getTotalPages());</b>
+<b class="fc">&nbsp;            response.put(&quot;totalElements&quot;, templates.getTotalElements());</b>
+<b class="fc">&nbsp;            response.put(&quot;currentPage&quot;, page);</b>
+<b class="fc">&nbsp;            response.put(&quot;pageSize&quot;, size);</b>
+&nbsp;            
+<b class="fc">&nbsp;            return ResponseEntity.ok(response);</b>
+&nbsp;        } catch (Exception e) {
+<b class="fc">&nbsp;            log.error(&quot;获取模板列表失败&quot;, e);</b>
+<b class="fc">&nbsp;            return ResponseEntity.badRequest().body(</b>
+<b class="fc">&nbsp;                Map.of(&quot;error&quot;, &quot;获取模板列表失败: &quot; + e.getMessage())</b>
+&nbsp;            );
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 获取精选模板
+&nbsp;     */
+&nbsp;    @GetMapping(&quot;/featured&quot;)
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; getFeaturedTemplates(
+&nbsp;            @RequestHeader(value = &quot;Authorization&quot;, required = false) String authHeader) {
+&nbsp;        try {
+&nbsp;            // 获取用户ID（如果提供了认证头）
+<b class="fc">&nbsp;            Long userId = null;</b>
+<b class="fc">&nbsp;            if (authHeader != null &amp;&amp; authHeader.startsWith(&quot;Bearer &quot;)) {</b>
+&nbsp;                try {
+<b class="fc">&nbsp;                    String token = authHeader.substring(7);</b>
+<b class="fc">&nbsp;                    log.info(&quot;精选模板 - 解析token: {}&quot;, token.substring(0, Math.min(20, token.length())) + &quot;...&quot;);</b>
+<b class="fc">&nbsp;                    String email = jwtTokenProvider.getEmailFromToken(token);</b>
+<b class="fc">&nbsp;                    log.info(&quot;精选模板 - 从token获取到邮箱: {}&quot;, email);</b>
+<b class="fc">&nbsp;                    Optional&lt;User&gt; userOpt = userService.findByEmail(email);</b>
+<b class="fc">&nbsp;                    if (userOpt.isPresent()) {</b>
+<b class="fc">&nbsp;                        userId = userOpt.get().getId();</b>
+<b class="fc">&nbsp;                        log.info(&quot;精选模板 - 找到用户ID: {}&quot;, userId);</b>
+&nbsp;                    } else {
+<b class="fc">&nbsp;                        log.warn(&quot;精选模板 - 未找到用户: {}&quot;, email);</b>
+&nbsp;                    }
+&nbsp;                } catch (Exception e) {
+<b class="fc">&nbsp;                    log.warn(&quot;精选模板 - 解析用户token失败，将以游客身份获取精选模板: {}&quot;, e.getMessage());</b>
+&nbsp;                }
+&nbsp;            } else {
+<b class="fc">&nbsp;                log.info(&quot;精选模板 - 未提供认证头，将以游客身份获取精选模板&quot;);</b>
+&nbsp;            }
+&nbsp;            
+<b class="fc">&nbsp;            List&lt;PromptTemplate&gt; templates = promptTemplateService.getFeaturedTemplates();</b>
+&nbsp;            // 使用包含用户ID的convertToDTO方法
+<b class="fc">&nbsp;            List&lt;PromptTemplateDTO&gt; templateDTOs = promptTemplateService.convertToDTO(templates, userId);</b>
+&nbsp;            
+&nbsp;            // 添加调试日志
+<b class="fc">&nbsp;            log.info(&quot;精选模板 - 返回模板数量: {}, 用户ID: {}&quot;, templateDTOs.size(), userId);</b>
+<b class="fc">&nbsp;            templateDTOs.forEach(dto -&gt; {</b>
+<b class="fc">&nbsp;                log.info(&quot;精选模板 {} ({}): liked={}, likeCount={}&quot;, dto.getId(), dto.getTitle(), dto.getLiked(), dto.getLikeCount());</b>
+&nbsp;            });
+&nbsp;            
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            response.put(&quot;success&quot;, true);</b>
+<b class="fc">&nbsp;            response.put(&quot;templates&quot;, templateDTOs);</b>
+<b class="fc">&nbsp;            return ResponseEntity.ok(response);</b>
+&nbsp;        } catch (Exception e) {
+<b class="fc">&nbsp;            log.error(&quot;获取精选模板失败&quot;, e);</b>
+<b class="fc">&nbsp;            return ResponseEntity.badRequest().body(</b>
+<b class="fc">&nbsp;                Map.of(&quot;error&quot;, &quot;获取精选模板失败: &quot; + e.getMessage())</b>
+&nbsp;            );
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 获取热门模板
+&nbsp;     */
+&nbsp;    @GetMapping(&quot;/popular&quot;)
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; getPopularTemplates(
+&nbsp;            @RequestHeader(value = &quot;Authorization&quot;, required = false) String authHeader) {
+&nbsp;        try {
+&nbsp;            // 获取用户ID（如果提供了认证头）
+<b class="fc">&nbsp;            Long userId = null;</b>
+<b class="fc">&nbsp;            if (authHeader != null &amp;&amp; authHeader.startsWith(&quot;Bearer &quot;)) {</b>
+&nbsp;                try {
+<b class="fc">&nbsp;                    String token = authHeader.substring(7);</b>
+<b class="fc">&nbsp;                    String email = jwtTokenProvider.getEmailFromToken(token);</b>
+<b class="fc">&nbsp;                    Optional&lt;User&gt; userOpt = userService.findByEmail(email);</b>
+<b class="fc">&nbsp;                    if (userOpt.isPresent()) {</b>
+<b class="fc">&nbsp;                        userId = userOpt.get().getId();</b>
+&nbsp;                    }
+&nbsp;                } catch (Exception e) {
+<b class="fc">&nbsp;                    log.warn(&quot;解析用户token失败，将以游客身份获取热门模板: {}&quot;, e.getMessage());</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            
+<b class="fc">&nbsp;            List&lt;PromptTemplate&gt; templates = promptTemplateService.getPopularTemplates();</b>
+&nbsp;            // 使用包含用户ID的convertToDTO方法
+<b class="fc">&nbsp;            List&lt;PromptTemplateDTO&gt; templateDTOs = promptTemplateService.convertToDTO(templates, userId);</b>
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            response.put(&quot;success&quot;, true);</b>
+<b class="fc">&nbsp;            response.put(&quot;templates&quot;, templateDTOs);</b>
+<b class="fc">&nbsp;            return ResponseEntity.ok(response);</b>
+&nbsp;        } catch (Exception e) {
+<b class="fc">&nbsp;            log.error(&quot;获取热门模板失败&quot;, e);</b>
+<b class="fc">&nbsp;            return ResponseEntity.badRequest().body(</b>
+<b class="fc">&nbsp;                Map.of(&quot;error&quot;, &quot;获取热门模板失败: &quot; + e.getMessage())</b>
+&nbsp;            );
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 获取最新模板
+&nbsp;     */
+&nbsp;    @GetMapping(&quot;/latest&quot;)
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; getLatestTemplates(
+&nbsp;            @RequestHeader(value = &quot;Authorization&quot;, required = false) String authHeader) {
+&nbsp;        try {
+&nbsp;            // 获取用户ID（如果提供了认证头）
+<b class="fc">&nbsp;            Long userId = null;</b>
+<b class="pc">&nbsp;            if (authHeader != null &amp;&amp; authHeader.startsWith(&quot;Bearer &quot;)) {</b>
+&nbsp;                try {
+<b class="nc">&nbsp;                    String token = authHeader.substring(7);</b>
+<b class="nc">&nbsp;                    String email = jwtTokenProvider.getEmailFromToken(token);</b>
+<b class="nc">&nbsp;                    Optional&lt;User&gt; userOpt = userService.findByEmail(email);</b>
+<b class="nc">&nbsp;                    if (userOpt.isPresent()) {</b>
+<b class="nc">&nbsp;                        userId = userOpt.get().getId();</b>
+&nbsp;                    }
+&nbsp;                } catch (Exception e) {
+<b class="nc">&nbsp;                    log.warn(&quot;解析用户token失败，将以游客身份获取最新模板: {}&quot;, e.getMessage());</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            
+<b class="fc">&nbsp;            List&lt;PromptTemplate&gt; templates = promptTemplateService.getLatestTemplates();</b>
+&nbsp;            // 使用包含用户ID的convertToDTO方法
+<b class="fc">&nbsp;            List&lt;PromptTemplateDTO&gt; templateDTOs = promptTemplateService.convertToDTO(templates, userId);</b>
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            response.put(&quot;success&quot;, true);</b>
+<b class="fc">&nbsp;            response.put(&quot;templates&quot;, templateDTOs);</b>
+<b class="fc">&nbsp;            return ResponseEntity.ok(response);</b>
+&nbsp;        } catch (Exception e) {
+<b class="fc">&nbsp;            log.error(&quot;获取最新模板失败&quot;, e);</b>
+<b class="fc">&nbsp;            return ResponseEntity.badRequest().body(</b>
+<b class="fc">&nbsp;                Map.of(&quot;error&quot;, &quot;获取最新模板失败: &quot; + e.getMessage())</b>
+&nbsp;            );
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 根据AI模型推荐模板
+&nbsp;     */
+&nbsp;    @GetMapping(&quot;/recommended&quot;)
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; getRecommendedTemplates(
+&nbsp;            @RequestHeader(value = &quot;Authorization&quot;, required = false) String authHeader,
+&nbsp;            @RequestParam(&quot;aiModel&quot;) String aiModel) {
+&nbsp;        try {
+&nbsp;            // 获取用户ID（如果提供了认证头）
+<b class="fc">&nbsp;            Long userId = null;</b>
+<b class="pc">&nbsp;            if (authHeader != null &amp;&amp; authHeader.startsWith(&quot;Bearer &quot;)) {</b>
+&nbsp;                try {
+<b class="fc">&nbsp;                    String token = authHeader.substring(7);</b>
+<b class="fc">&nbsp;                    String email = jwtTokenProvider.getEmailFromToken(token);</b>
+<b class="fc">&nbsp;                    Optional&lt;User&gt; userOpt = userService.findByEmail(email);</b>
+<b class="pc">&nbsp;                    if (userOpt.isPresent()) {</b>
+<b class="nc">&nbsp;                        userId = userOpt.get().getId();</b>
+&nbsp;                    }
+&nbsp;                } catch (Exception e) {
+<b class="nc">&nbsp;                    log.warn(&quot;解析用户token失败，将以游客身份获取推荐模板: {}&quot;, e.getMessage());</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            
+<b class="fc">&nbsp;            List&lt;PromptTemplate&gt; templates = promptTemplateService.getRecommendedTemplates(aiModel);</b>
+&nbsp;            // 使用包含用户ID的convertToDTO方法
+<b class="fc">&nbsp;            List&lt;PromptTemplateDTO&gt; templateDTOs = promptTemplateService.convertToDTO(templates, userId);</b>
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            response.put(&quot;success&quot;, true);</b>
+<b class="fc">&nbsp;            response.put(&quot;templates&quot;, templateDTOs);</b>
+<b class="fc">&nbsp;            return ResponseEntity.ok(response);</b>
+&nbsp;        } catch (Exception e) {
+<b class="fc">&nbsp;            log.error(&quot;获取推荐模板失败&quot;, e);</b>
+<b class="fc">&nbsp;            return ResponseEntity.badRequest().body(</b>
+<b class="fc">&nbsp;                Map.of(&quot;error&quot;, &quot;获取推荐模板失败: &quot; + e.getMessage())</b>
+&nbsp;            );
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 获取模板详情
+&nbsp;     */
+&nbsp;    @GetMapping(&quot;/{id}&quot;)
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; getTemplateById(
+&nbsp;            @RequestHeader(value = &quot;Authorization&quot;, required = false) String authHeader,
+&nbsp;            @PathVariable Long id) {
+&nbsp;        try {
+&nbsp;            // 获取用户ID（如果提供了认证头）
+<b class="fc">&nbsp;            Long userId = null;</b>
+<b class="fc">&nbsp;            if (authHeader != null &amp;&amp; authHeader.startsWith(&quot;Bearer &quot;)) {</b>
+&nbsp;                try {
+<b class="fc">&nbsp;                    String token = authHeader.substring(7);</b>
+<b class="fc">&nbsp;                    String email = jwtTokenProvider.getEmailFromToken(token);</b>
+<b class="fc">&nbsp;                    Optional&lt;User&gt; userOpt = userService.findByEmail(email);</b>
+<b class="fc">&nbsp;                    if (userOpt.isPresent()) {</b>
+<b class="fc">&nbsp;                        userId = userOpt.get().getId();</b>
+&nbsp;                    }
+&nbsp;                } catch (Exception e) {
+<b class="fc">&nbsp;                    log.warn(&quot;解析用户token失败，将以游客身份获取模板详情: {}&quot;, e.getMessage());</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            
+<b class="fc">&nbsp;            Optional&lt;PromptTemplate&gt; template = promptTemplateService.getTemplateById(id);</b>
+<b class="fc">&nbsp;            if (template.isPresent()) {</b>
+&nbsp;                // 使用包含用户ID的convertToDTO方法
+<b class="fc">&nbsp;                List&lt;PromptTemplateDTO&gt; templateDTOs = promptTemplateService.convertToDTO(List.of(template.get()), userId);</b>
+<b class="fc">&nbsp;                Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;                response.put(&quot;success&quot;, true);</b>
+<b class="fc">&nbsp;                response.put(&quot;template&quot;, templateDTOs.get(0));</b>
+<b class="fc">&nbsp;                return ResponseEntity.ok(response);</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                return ResponseEntity.notFound().build();</b>
+&nbsp;            }
+&nbsp;        } catch (Exception e) {
+<b class="fc">&nbsp;            log.error(&quot;获取模板详情失败&quot;, e);</b>
+<b class="fc">&nbsp;            return ResponseEntity.badRequest().body(</b>
+<b class="fc">&nbsp;                Map.of(&quot;error&quot;, &quot;获取模板详情失败: &quot; + e.getMessage())</b>
+&nbsp;            );
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 创建模板
+&nbsp;     */
+&nbsp;    @PostMapping
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; createTemplate(
+&nbsp;            @RequestHeader(&quot;Authorization&quot;) String authHeader,
+&nbsp;            @RequestBody PromptTemplate template) {
+&nbsp;        
+&nbsp;        try {
+&nbsp;            // 验证token并获取用户信息
+<b class="fc">&nbsp;            String token = authHeader.substring(7);</b>
+<b class="fc">&nbsp;            String email = jwtTokenProvider.getEmailFromToken(token);</b>
+<b class="fc">&nbsp;            Optional&lt;User&gt; userOpt = userService.findByEmail(email);</b>
+&nbsp;            
+<b class="fc">&nbsp;            if (userOpt.isEmpty()) {</b>
+<b class="fc">&nbsp;                return ResponseEntity.badRequest().body(</b>
+<b class="fc">&nbsp;                    Map.of(&quot;error&quot;, &quot;用户不存在&quot;)</b>
+&nbsp;                );
+&nbsp;            }
+&nbsp;            
+<b class="fc">&nbsp;            User user = userOpt.get();</b>
+&nbsp;            
+&nbsp;            // 设置创建者信息
+<b class="fc">&nbsp;            template.setCreatorId(user.getId());</b>
+<b class="fc">&nbsp;            template.setCreatorName(user.getUsername());</b>
+<b class="fc">&nbsp;            template.setTemplateType(PromptTemplate.TemplateType.USER);</b>
+&nbsp;            
+<b class="fc">&nbsp;            PromptTemplate savedTemplate = promptTemplateService.createTemplate(template);</b>
+<b class="fc">&nbsp;            List&lt;PromptTemplateDTO&gt; templateDTOs = promptTemplateService.convertToDTO(List.of(savedTemplate));</b>
+&nbsp;            
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            response.put(&quot;success&quot;, true);</b>
+<b class="fc">&nbsp;            response.put(&quot;message&quot;, &quot;模板创建成功&quot;);</b>
+<b class="fc">&nbsp;            response.put(&quot;template&quot;, templateDTOs.get(0));</b>
+&nbsp;            
+<b class="fc">&nbsp;            return ResponseEntity.ok(response);</b>
+&nbsp;        } catch (Exception e) {
+<b class="fc">&nbsp;            log.error(&quot;创建模板失败&quot;, e);</b>
+<b class="fc">&nbsp;            return ResponseEntity.badRequest().body(</b>
+<b class="fc">&nbsp;                Map.of(&quot;error&quot;, &quot;创建模板失败: &quot; + e.getMessage())</b>
+&nbsp;            );
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 更新模板
+&nbsp;     */
+&nbsp;    @PutMapping(&quot;/{id}&quot;)
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; updateTemplate(
+&nbsp;            @RequestHeader(&quot;Authorization&quot;) String authHeader,
+&nbsp;            @PathVariable Long id,
+&nbsp;            @RequestBody PromptTemplate template) {
+&nbsp;        
+&nbsp;        try {
+&nbsp;            // 验证token并获取用户信息
+<b class="fc">&nbsp;            String token = authHeader.substring(7);</b>
+<b class="fc">&nbsp;            String email = jwtTokenProvider.getEmailFromToken(token);</b>
+<b class="fc">&nbsp;            Optional&lt;User&gt; userOpt = userService.findByEmail(email);</b>
+&nbsp;            
+<b class="pc">&nbsp;            if (userOpt.isEmpty()) {</b>
+<b class="nc">&nbsp;                return ResponseEntity.badRequest().body(</b>
+<b class="nc">&nbsp;                    Map.of(&quot;error&quot;, &quot;用户不存在&quot;)</b>
+&nbsp;                );
+&nbsp;            }
+&nbsp;            
+<b class="fc">&nbsp;            User user = userOpt.get();</b>
+&nbsp;            
+&nbsp;            // 检查权限
+<b class="fc">&nbsp;            Optional&lt;PromptTemplate&gt; existingTemplate = promptTemplateService.getTemplateById(id);</b>
+<b class="pc">&nbsp;            if (existingTemplate.isEmpty()) {</b>
+<b class="nc">&nbsp;                return ResponseEntity.notFound().build();</b>
+&nbsp;            }
+&nbsp;            
+<b class="fc">&nbsp;            PromptTemplate existing = existingTemplate.get();</b>
+<b class="pc">&nbsp;            if (!existing.getCreatorId().equals(user.getId()) &amp;&amp; !&quot;admin&quot;.equals(user.getRole())) {</b>
+<b class="fc">&nbsp;                return ResponseEntity.badRequest().body(</b>
+<b class="fc">&nbsp;                    Map.of(&quot;error&quot;, &quot;没有权限修改此模板&quot;)</b>
+&nbsp;                );
+&nbsp;            }
+&nbsp;            
+<b class="fc">&nbsp;            PromptTemplate updatedTemplate = promptTemplateService.updateTemplate(id, template);</b>
+<b class="fc">&nbsp;            List&lt;PromptTemplateDTO&gt; templateDTOs = promptTemplateService.convertToDTO(List.of(updatedTemplate));</b>
+&nbsp;            
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            response.put(&quot;success&quot;, true);</b>
+<b class="fc">&nbsp;            response.put(&quot;message&quot;, &quot;模板更新成功&quot;);</b>
+<b class="fc">&nbsp;            response.put(&quot;template&quot;, templateDTOs.get(0));</b>
+&nbsp;            
+<b class="fc">&nbsp;            return ResponseEntity.ok(response);</b>
+&nbsp;        } catch (Exception e) {
+<b class="fc">&nbsp;            log.error(&quot;更新模板失败&quot;, e);</b>
+<b class="fc">&nbsp;            return ResponseEntity.badRequest().body(</b>
+<b class="fc">&nbsp;                Map.of(&quot;error&quot;, &quot;更新模板失败: &quot; + e.getMessage())</b>
+&nbsp;            );
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 删除模板
+&nbsp;     */
+&nbsp;    @DeleteMapping(&quot;/{id}&quot;)
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; deleteTemplate(
+&nbsp;            @RequestHeader(&quot;Authorization&quot;) String authHeader,
+&nbsp;            @PathVariable Long id) {
+&nbsp;        
+&nbsp;        try {
+&nbsp;            // 验证token并获取用户信息
+<b class="fc">&nbsp;            String token = authHeader.substring(7);</b>
+<b class="fc">&nbsp;            String email = jwtTokenProvider.getEmailFromToken(token);</b>
+<b class="fc">&nbsp;            Optional&lt;User&gt; userOpt = userService.findByEmail(email);</b>
+&nbsp;            
+<b class="pc">&nbsp;            if (userOpt.isEmpty()) {</b>
+<b class="nc">&nbsp;                return ResponseEntity.badRequest().body(</b>
+<b class="nc">&nbsp;                    Map.of(&quot;error&quot;, &quot;用户不存在&quot;)</b>
+&nbsp;                );
+&nbsp;            }
+&nbsp;            
+<b class="fc">&nbsp;            User user = userOpt.get();</b>
+&nbsp;            
+&nbsp;            // 检查权限
+<b class="fc">&nbsp;            Optional&lt;PromptTemplate&gt; existingTemplate = promptTemplateService.getTemplateById(id);</b>
+<b class="pc">&nbsp;            if (existingTemplate.isEmpty()) {</b>
+<b class="nc">&nbsp;                return ResponseEntity.notFound().build();</b>
+&nbsp;            }
+&nbsp;            
+<b class="fc">&nbsp;            PromptTemplate existing = existingTemplate.get();</b>
+<b class="pc">&nbsp;            if (!existing.getCreatorId().equals(user.getId()) &amp;&amp; !&quot;admin&quot;.equals(user.getRole())) {</b>
+<b class="nc">&nbsp;                return ResponseEntity.badRequest().body(</b>
+<b class="nc">&nbsp;                    Map.of(&quot;error&quot;, &quot;没有权限删除此模板&quot;)</b>
+&nbsp;                );
+&nbsp;            }
+&nbsp;            
+<b class="fc">&nbsp;            promptTemplateService.deleteTemplate(id);</b>
+&nbsp;            
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            response.put(&quot;success&quot;, true);</b>
+<b class="fc">&nbsp;            response.put(&quot;message&quot;, &quot;模板删除成功&quot;);</b>
+&nbsp;            
+<b class="fc">&nbsp;            return ResponseEntity.ok(response);</b>
+&nbsp;        } catch (Exception e) {
+<b class="fc">&nbsp;            log.error(&quot;删除模板失败&quot;, e);</b>
+<b class="fc">&nbsp;            return ResponseEntity.badRequest().body(</b>
+<b class="fc">&nbsp;                Map.of(&quot;error&quot;, &quot;删除模板失败: &quot; + e.getMessage())</b>
+&nbsp;            );
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 点赞/取消点赞模板
+&nbsp;     */
+&nbsp;    @PostMapping(&quot;/{id}/like&quot;)
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; toggleLike(
+&nbsp;            @RequestHeader(&quot;Authorization&quot;) String authHeader,
+&nbsp;            @PathVariable Long id) {
+&nbsp;        
+&nbsp;        try {
+&nbsp;            // 验证token并获取用户信息
+<b class="fc">&nbsp;            String token = authHeader.substring(7);</b>
+<b class="fc">&nbsp;            String email = jwtTokenProvider.getEmailFromToken(token);</b>
+<b class="fc">&nbsp;            Optional&lt;User&gt; userOpt = userService.findByEmail(email);</b>
+&nbsp;            
+<b class="pc">&nbsp;            if (userOpt.isEmpty()) {</b>
+<b class="nc">&nbsp;                return ResponseEntity.badRequest().body(</b>
+<b class="nc">&nbsp;                    Map.of(&quot;error&quot;, &quot;用户不存在&quot;)</b>
+&nbsp;                );
+&nbsp;            }
+&nbsp;            
+<b class="fc">&nbsp;            User user = userOpt.get();</b>
+&nbsp;            
+<b class="fc">&nbsp;            boolean isLiked = promptTemplateService.toggleLike(id, user.getId());</b>
+&nbsp;            
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            response.put(&quot;success&quot;, true);</b>
+<b class="fc">&nbsp;            response.put(&quot;liked&quot;, isLiked);</b>
+<b class="pc">&nbsp;            response.put(&quot;message&quot;, isLiked ? &quot;点赞成功&quot; : &quot;取消点赞成功&quot;);</b>
+&nbsp;            
+<b class="fc">&nbsp;            return ResponseEntity.ok(response);</b>
+&nbsp;        } catch (Exception e) {
+<b class="fc">&nbsp;            log.error(&quot;点赞操作失败&quot;, e);</b>
+<b class="fc">&nbsp;            return ResponseEntity.badRequest().body(</b>
+<b class="fc">&nbsp;                Map.of(&quot;error&quot;, &quot;点赞操作失败: &quot; + e.getMessage())</b>
+&nbsp;            );
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 使用模板
+&nbsp;     */
+&nbsp;    @PostMapping(&quot;/{id}/use&quot;)
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; useTemplate(
+&nbsp;            @RequestHeader(&quot;Authorization&quot;) String authHeader,
+&nbsp;            @PathVariable Long id,
+&nbsp;            @RequestBody Map&lt;String, String&gt; request) {
+&nbsp;        
+&nbsp;        try {
+&nbsp;            // 验证token并获取用户信息
+<b class="fc">&nbsp;            String token = authHeader.substring(7);</b>
+<b class="fc">&nbsp;            String email = jwtTokenProvider.getEmailFromToken(token);</b>
+<b class="fc">&nbsp;            Optional&lt;User&gt; userOpt = userService.findByEmail(email);</b>
+&nbsp;            
+<b class="pc">&nbsp;            if (userOpt.isEmpty()) {</b>
+<b class="nc">&nbsp;                return ResponseEntity.badRequest().body(</b>
+<b class="nc">&nbsp;                    Map.of(&quot;error&quot;, &quot;用户不存在&quot;)</b>
+&nbsp;                );
+&nbsp;            }
+&nbsp;            
+<b class="fc">&nbsp;            User user = userOpt.get();</b>
+&nbsp;            
+<b class="fc">&nbsp;            String aiModel = request.get(&quot;aiModel&quot;);</b>
+<b class="fc">&nbsp;            promptTemplateService.recordUsage(id, user.getId(), aiModel);</b>
+&nbsp;            
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            response.put(&quot;success&quot;, true);</b>
+<b class="fc">&nbsp;            response.put(&quot;message&quot;, &quot;使用记录已保存&quot;);</b>
+&nbsp;            
+<b class="fc">&nbsp;            return ResponseEntity.ok(response);</b>
+&nbsp;        } catch (Exception e) {
+<b class="fc">&nbsp;            log.error(&quot;记录使用失败&quot;, e);</b>
+<b class="fc">&nbsp;            return ResponseEntity.badRequest().body(</b>
+<b class="fc">&nbsp;                Map.of(&quot;error&quot;, &quot;记录使用失败: &quot; + e.getMessage())</b>
+&nbsp;            );
+&nbsp;        }
+&nbsp;    }
+&nbsp;} 
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-07-18 23:35</div>
+</div>
+</body>
+</html>

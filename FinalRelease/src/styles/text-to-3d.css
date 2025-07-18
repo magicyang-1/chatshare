@@ -1,0 +1,1001 @@
+/* 文生3D界面专用样式 */
+
+/* 基础3D界面容器 */
+.text-to-3d-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* 模式切换器 */
+.mode-switcher {
+  padding: 1rem;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-primary);
+  flex-shrink: 0;
+}
+
+.mode-tabs {
+  display: flex;
+  gap: 0.5rem;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  padding: 0.25rem;
+}
+
+.mode-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  flex: 1;
+  justify-content: center;
+}
+
+.mode-tab:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.mode-tab.active {
+  background: var(--primary-500);
+  color: white;
+  font-weight: 600;
+}
+
+/* 主要内容区域 */
+.threed-main-content {
+  display: flex;
+  flex: 1;
+  gap: 1rem;
+  padding: 1rem;
+  overflow: hidden;
+}
+
+/* 左侧表单区域 */
+.threed-form-section {
+  flex: 1;
+  background: var(--bg-primary);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid var(--border-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  overflow-y: auto;
+}
+
+.threed-form-section h3 {
+  margin: 0 0 1rem 0;
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+/* 右侧状态区域 */
+.threed-status-section {
+  flex: 0 0 35%;
+  min-width: 320px;
+  max-width: 400px;
+  background: var(--bg-primary);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid var(--border-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+}
+
+/* 表单样式 */
+.threed-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.threed-form-group label {
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.threed-form-group input,
+.threed-form-group textarea,
+.threed-form-group select {
+  padding: 0.75rem;
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  transition: border-color 0.2s ease;
+}
+
+.threed-form-group input:focus,
+.threed-form-group textarea:focus,
+.threed-form-group select:focus {
+  outline: none;
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.threed-form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* 表单行布局 */
+.threed-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* 复选框样式 */
+.threed-checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.threed-checkbox-group input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+/* 按钮样式 */
+.threed-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.threed-btn-primary {
+  background: var(--primary-500);
+  color: white;
+}
+
+.threed-btn-primary:hover:not(:disabled) {
+  background: var(--primary-600);
+  transform: translateY(-1px);
+}
+
+.threed-btn-secondary {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-primary);
+}
+
+.threed-btn-secondary:hover:not(:disabled) {
+  background: var(--bg-tertiary);
+  border-color: var(--primary-400);
+}
+
+.threed-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 任务查询组件 */
+.task-query-compact {
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid var(--border-secondary);
+}
+
+.task-query-compact h4 {
+  margin: 0 0 0.75rem 0;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.task-query-input {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.task-query-input input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.8rem;
+}
+
+.task-query-input button {
+  padding: 0.5rem 1rem;
+  background: var(--primary-500);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.task-query-input button:hover:not(:disabled) {
+  background: var(--primary-600);
+}
+
+.task-query-input button:disabled {
+  background: var(--bg-tertiary);
+  color: var(--text-tertiary);
+  cursor: not-allowed;
+}
+
+/* 状态显示 */
+.threed-status-card {
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid var(--border-secondary);
+}
+
+.threed-status-card h4 {
+  margin: 0 0 0.75rem 0;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.status-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-tertiary);
+}
+
+.status-info-item:last-child {
+  border-bottom: none;
+}
+
+.status-info-item .label {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.status-info-item .value {
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* 进度条 */
+.threed-progress {
+  width: 100%;
+  height: 8px;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 0.5rem 0;
+}
+
+.threed-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-500), var(--primary-400));
+  transition: width 0.3s ease;
+}
+
+.threed-progress-text {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+}
+
+/* 结果展示 */
+.threed-result-card {
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid var(--border-secondary);
+}
+
+.threed-result-card h4 {
+  margin: 0 0 0.75rem 0;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.threed-result-preview {
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.threed-result-preview img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid var(--border-primary);
+}
+
+.threed-result-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.threed-download-btn {
+  padding: 0.5rem 1rem;
+  background: var(--primary-500);
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: background 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.threed-download-btn:hover {
+  background: var(--primary-600);
+}
+
+/* 错误消息 */
+.threed-error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #dc2626;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+/* 成功消息 */
+.threed-success {
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: #059669;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+/* 历史记录界面样式 */
+.threed-search-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.threed-search-input input {
+  width: 100%;
+  padding-right: 2.5rem;
+}
+
+.threed-search-input .search-icon {
+  position: absolute;
+  right: 0.75rem;
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+
+/* 历史记录界面特殊布局 */
+.threed-form-section.history-mode {
+  gap: 1rem; /* 缩小间距 */
+}
+
+.threed-form-section.history-mode h3 {
+  margin: 0 0 0.5rem 0; /* 缩小标题下间距 */
+  font-size: 1.1rem; /* 稍小的标题 */
+}
+
+.threed-form-section.history-mode .threed-form-group {
+  margin-bottom: 0.5rem; /* 缩小搜索栏下间距 */
+}
+
+.threed-history-list {
+  flex: 1; /* 占用剩余空间 */
+  max-height: none; /* 移除最大高度限制 */
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  padding: 0.5rem 0;
+}
+
+.threed-history-item {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-secondary);
+  border-radius: 8px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.threed-history-item:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--primary-300);
+  transform: translateY(-1px);
+}
+
+.threed-history-item.selected {
+  background: var(--primary-bg);
+  border-color: var(--primary-500);
+}
+
+.history-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.history-item-id {
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.history-item-status {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.history-item-status.status-preview {
+  background: rgba(34, 197, 94, 0.1);
+  color: #059669;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.history-item-status.status-refine {
+  background: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.history-item-status.status-unknown {
+  background: rgba(107, 114, 128, 0.1);
+  color: #4b5563;
+  border: 1px solid rgba(107, 114, 128, 0.3);
+}
+
+.history-item-content {
+  margin-bottom: 0.75rem;
+}
+
+.history-item-prompt {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.history-item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.history-item-meta span {
+  background: var(--bg-tertiary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.history-item-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.history-item-actions button {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.threed-btn-danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.threed-btn-danger:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.threed-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  color: var(--text-secondary);
+}
+
+.loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--border-primary);
+  border-top: 2px solid var(--primary-500);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.threed-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  color: var(--text-secondary);
+}
+
+.threed-empty-state svg {
+  color: var(--text-tertiary);
+}
+
+/* 状态颜色样式 */
+.status-preview {
+  color: #059669 !important;
+}
+
+.status-refine {
+  color: #2563eb !important;
+}
+
+.status-unknown {
+  color: #4b5563 !important;
+}
+
+/* 不同屏幕宽度下的历史记录网格适配 */
+@media (min-width: 1400px) {
+  .threed-history-list {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+}
+
+@media (min-width: 1200px) and (max-width: 1399px) {
+  .threed-history-list {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1199px) {
+  .threed-history-list {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
+@media (min-width: 769px) and (max-width: 899px) {
+  .threed-history-list {
+    grid-template-columns: 1fr; /* 单列显示 */
+  }
+}
+
+/* 大屏幕优化 */
+@media (min-width: 1200px) {
+  .threed-status-section {
+    flex: 0 0 38%;
+    min-width: 360px;
+    max-width: 450px;
+  }
+}
+
+/* 中等屏幕优化 */
+@media (min-width: 1024px) and (max-width: 1199px) {
+  .threed-status-section {
+    flex: 0 0 36%;
+    min-width: 340px;
+    max-width: 420px;
+  }
+}
+
+/* 小屏幕Web端优化 */
+@media (min-width: 769px) and (max-width: 1023px) {
+  .threed-status-section {
+    flex: 0 0 33%;
+    min-width: 280px;
+    max-width: 360px;
+  }
+  
+  .threed-form-section {
+    padding: 1.2rem;
+  }
+  
+  .threed-status-section {
+    padding: 1.2rem;
+  }
+}
+
+/* 移动端响应式设计 */
+@media (max-width: 768px) {
+  .threed-main-content {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    overflow-y: auto; /* 主容器滚动 */
+  }
+
+  .threed-status-section {
+    flex: none;
+    order: -1; /* 在移动端将状态区域置于顶部 */
+    overflow-y: visible; /* 取消自身滚动 */
+    min-width: auto;
+    max-width: none;
+  }
+
+  .threed-form-section {
+    flex: none; /* 不要拉伸填充 */
+    overflow-y: visible; /* 取消自身滚动 */
+  }
+
+  .threed-form-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .mode-tabs {
+    flex-direction: row;
+  }
+
+  .mode-tab {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  /* 移动端历史记录回到单列布局 */
+  .threed-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .threed-form-section {
+    padding: 1rem;
+  }
+
+  .threed-status-section {
+    padding: 1rem;
+  }
+
+  /* 移动端状态卡片优化 */
+  .threed-status-card {
+    margin-bottom: 1rem;
+  }
+
+  .threed-result-actions {
+    flex-direction: column;
+  }
+
+  .threed-download-btn {
+    justify-content: center;
+  }
+
+  /* 移动端历史记录优化 */
+  .threed-history-list {
+    max-height: 300px;
+  }
+
+  .threed-history-item {
+    padding: 0.75rem;
+  }
+
+  .history-item-header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .history-item-id {
+    font-size: 0.75rem;
+  }
+
+  .history-item-status {
+    font-size: 0.7rem;
+  }
+
+  .history-item-prompt {
+    font-size: 0.85rem;
+  }
+
+  .history-item-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .history-item-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .history-item-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* 移动端搜索框优化 */
+  .threed-search-input {
+    margin-bottom: 0.5rem;
+  }
+
+  .threed-search-input input {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .threed-search-input .search-icon {
+    right: 0.75rem;
+  }
+}
+
+/* 小屏手机优化 */
+@media (max-width: 480px) {
+  .mode-switcher {
+    padding: 0.75rem;
+  }
+
+  .mode-tabs {
+    padding: 0.2rem;
+  }
+
+  .mode-tab {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+  }
+
+  .threed-main-content {
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+
+  .threed-form-section,
+  .threed-status-section {
+    padding: 0.75rem;
+  }
+
+  .threed-form-section h3 {
+    font-size: 1.125rem;
+  }
+
+  .threed-form-group input,
+  .threed-form-group textarea,
+  .threed-form-group select {
+    padding: 0.6rem;
+    font-size: 0.8rem;
+  }
+
+  .threed-btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.8rem;
+  }
+
+  .task-query-compact {
+    padding: 0.75rem;
+  }
+
+  .task-query-input input,
+  .task-query-input button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* 深色模式适配 */
+.dark-mode .threed-form-section,
+.dark-mode .threed-status-section {
+  background: var(--bg-primary);
+  border-color: var(--border-primary);
+}
+
+.dark-mode .threed-status-card,
+.dark-mode .threed-result-card {
+  background: var(--bg-secondary);
+  border-color: var(--border-secondary);
+}
+
+.dark-mode .task-query-compact {
+  background: var(--bg-tertiary);
+  border-color: var(--border-secondary);
+}
+
+.dark-mode .threed-form-group input,
+.dark-mode .threed-form-group textarea,
+.dark-mode .threed-form-group select {
+  background: var(--bg-secondary);
+  border-color: var(--border-primary);
+  color: var(--text-primary);
+}
+
+.dark-mode .threed-form-group input:focus,
+.dark-mode .threed-form-group textarea:focus,
+.dark-mode .threed-form-group select:focus {
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+}
+
+.dark-mode .threed-btn-secondary {
+  background: var(--bg-secondary);
+  border-color: var(--border-primary);
+  color: var(--text-primary);
+}
+
+.dark-mode .threed-btn-secondary:hover:not(:disabled) {
+  background: var(--bg-tertiary);
+  border-color: var(--primary-400);
+}
+
+.dark-mode .threed-progress {
+  background: var(--bg-tertiary);
+}
+
+.dark-mode .threed-result-preview img {
+  border-color: var(--border-primary);
+}
+
+/* 动画效果 */
+@keyframes threedPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.threed-generating {
+  animation: threedPulse 2s infinite;
+}
+
+/* 3D特效（可选） */
+.threed-card-3d {
+  transform-style: preserve-3d;
+  transition: transform 0.3s ease;
+}
+
+.threed-card-3d:hover {
+  transform: rotateY(5deg) rotateX(5deg);
+}
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+  .threed-form-section,
+  .threed-status-section {
+    border-width: 2px;
+  }
+
+  .threed-btn-primary {
+    border: 2px solid var(--primary-600);
+  }
+
+  .threed-btn-secondary {
+    border-width: 2px;
+  }
+}
+
+/* 极窄屏幕下的mode-switcher优化 - 隐藏文字，只显示图标 */
+@media (max-width: 480px) {
+  .mode-tab {
+    padding: 0.5rem 0.25rem;
+    min-width: 40px;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .mode-tab svg {
+    flex-shrink: 0;
+  }
+  
+  /* 在极窄屏幕下隐藏文字，只显示图标 */
+  .mode-tab {
+    font-size: 0; /* 隐藏文字 */
+  }
+  
+  .mode-tab svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* 超窄屏幕下进一步压缩 */
+@media (max-width: 400px) {
+  .mode-tab {
+    padding: 0.4rem 0.2rem;
+    min-width: 36px;
+  }
+  
+  .mode-tab svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* 减少动画模式支持 */
+@media (prefers-reduced-motion: reduce) {
+  .threed-btn,
+  .threed-form-group input,
+  .threed-form-group textarea,
+  .threed-form-group select,
+  .threed-progress-fill {
+    transition: none;
+  }
+
+  .threed-generating {
+    animation: none;
+  }
+
+  .threed-card-3d:hover {
+    transform: none;
+  }
+}
+
+/* 权限不足页面样式 */
+.text-to-3d-container .permission-denied {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  background: var(--bg-primary);
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+}
+
+.text-to-3d-container .permission-denied-content {
+  text-align: center;
+  padding: 3rem;
+  max-width: 500px;
+}
+
+.text-to-3d-container .permission-icon {
+  color: var(--error);
+  margin-bottom: 1.5rem;
+}
+
+.text-to-3d-container .permission-denied-content h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.text-to-3d-container .permission-denied-content p {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+} 

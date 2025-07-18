@@ -1,0 +1,139 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > MessageAttachmentRepository</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.aiplatform.repository</a>
+</div>
+
+<h1>Coverage Summary for Class: MessageAttachmentRepository (com.aiplatform.repository)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">MessageAttachmentRepository$MockitoMock$f6qf0Rtk</td>
+  </tr>
+  <tr>
+    <td class="name">MessageAttachmentRepository$MockitoMock$f6qf0Rtk$auxiliary$15lXHGIy</td>
+  </tr>
+  <tr>
+    <td class="name">MessageAttachmentRepository$MockitoMock$f6qf0Rtk$auxiliary$GskX3ROn</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.aiplatform.repository;
+&nbsp;
+&nbsp;import com.aiplatform.entity.MessageAttachment;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.data.jpa.repository.Query;
+&nbsp;import org.springframework.data.repository.query.Param;
+&nbsp;import org.springframework.stereotype.Repository;
+&nbsp;
+&nbsp;import java.time.LocalDateTime;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@Repository
+&nbsp;public interface MessageAttachmentRepository extends JpaRepository&lt;MessageAttachment, Long&gt; {
+&nbsp;
+&nbsp;    // 根据消息ID查找附件
+&nbsp;    List&lt;MessageAttachment&gt; findByMessageIdOrderByCreatedAtAsc(Long messageId);
+&nbsp;
+&nbsp;    // 根据文件名查找附件
+&nbsp;    MessageAttachment findByFileName(String fileName);
+&nbsp;
+&nbsp;    // 根据消息ID和附件类型查找
+&nbsp;    List&lt;MessageAttachment&gt; findByMessageIdAndAttachmentType(Long messageId, MessageAttachment.AttachmentType attachmentType);
+&nbsp;
+&nbsp;    // 查找图片附件
+&nbsp;    @Query(&quot;SELECT ma FROM MessageAttachment ma WHERE ma.attachmentType = &#39;IMAGE&#39; ORDER BY ma.createdAt DESC&quot;)
+&nbsp;    List&lt;MessageAttachment&gt; findAllImageAttachments();
+&nbsp;
+&nbsp;    // 统计消息的附件数量
+&nbsp;    int countByMessageId(Long messageId);
+&nbsp;
+&nbsp;    // 统计某种类型的附件数量
+&nbsp;    int countByAttachmentType(MessageAttachment.AttachmentType attachmentType);
+&nbsp;
+&nbsp;    // 查找大文件附件
+&nbsp;    @Query(&quot;SELECT ma FROM MessageAttachment ma WHERE ma.fileSize &gt; :minSize ORDER BY ma.fileSize DESC&quot;)
+&nbsp;    List&lt;MessageAttachment&gt; findLargeFiles(@Param(&quot;minSize&quot;) Long minSize);
+&nbsp;
+&nbsp;    // 根据时间范围查找附件
+&nbsp;    @Query(&quot;SELECT ma FROM MessageAttachment ma WHERE ma.createdAt BETWEEN :startDate AND :endDate ORDER BY ma.createdAt DESC&quot;)
+&nbsp;    List&lt;MessageAttachment&gt; findByDateRange(@Param(&quot;startDate&quot;) LocalDateTime startDate, 
+&nbsp;                                           @Param(&quot;endDate&quot;) LocalDateTime endDate);
+&nbsp;
+&nbsp;    // 删除消息的所有附件
+&nbsp;    void deleteByMessageId(Long messageId);
+&nbsp;
+&nbsp;    // 查找未关联消息的附件（messageId为null）
+&nbsp;    List&lt;MessageAttachment&gt; findByMessageIdIsNull();
+&nbsp;    
+&nbsp;    // 根据文件名列表查找附件
+&nbsp;    List&lt;MessageAttachment&gt; findByFileNameIn(List&lt;String&gt; fileNames);
+&nbsp;
+&nbsp;    // 查找孤立的附件（没有关联消息的或消息不存在的）
+&nbsp;    @Query(&quot;SELECT ma FROM MessageAttachment ma WHERE ma.messageId IS NULL OR ma.messageId NOT IN (SELECT m.id FROM Message m)&quot;)
+&nbsp;    List&lt;MessageAttachment&gt; findOrphanedAttachments();
+&nbsp;
+&nbsp;    // 统计总文件大小
+&nbsp;    @Query(&quot;SELECT COALESCE(SUM(ma.fileSize), 0) FROM MessageAttachment ma&quot;)
+&nbsp;    Long getTotalFileSize();
+&nbsp;
+&nbsp;    // 根据MIME类型查找
+&nbsp;    List&lt;MessageAttachment&gt; findByMimeTypeContaining(String mimeType);
+&nbsp;} 
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-07-18 23:35</div>
+</div>
+</body>
+</html>

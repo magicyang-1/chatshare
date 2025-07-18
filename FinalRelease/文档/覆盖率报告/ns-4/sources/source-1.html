@@ -1,0 +1,176 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AIModel</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.aiplatform.entity</a>
+</div>
+
+<h1>Coverage Summary for Class: AIModel (com.aiplatform.entity)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AIModel</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (11/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (2/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    95.8%
+  </span>
+  <span class="absValue">
+    (23/24)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.aiplatform.entity;
+&nbsp;
+<b class="fc">&nbsp;public enum AIModel {</b>
+<b class="fc">&nbsp;    GPT_4_1_NANO(&quot;openai/gpt-4.1-nano&quot;, &quot;GPT-4.1 Nano&quot;, &quot;快速高效的多模态模型&quot;, true, true, 0.10, 0.40),</b>
+<b class="fc">&nbsp;    GEMINI_2_5_FLASH(&quot;google/gemini-2.5-flash&quot;, &quot;Gemini 2.5 Flash&quot;, &quot;Google的多模态模型&quot;, true, true, 0.30, 0.60),</b>
+<b class="fc">&nbsp;    DEEPSEEK_R1(&quot;deepseek/deepseek-r1-distill-qwen-7b&quot;, &quot;DeepSeek R1&quot;, &quot;DeepSeek推理模型&quot;, true, false, 0.15, 0.30),</b>
+<b class="fc">&nbsp;    QWEN_3_30B(&quot;qwen/qwen3-30b-a3b:free&quot;, &quot;Qwen 3 30B (免费)&quot;, &quot;通义千问大模型&quot;, true, false, 0.00, 0.00);</b>
+&nbsp;
+&nbsp;    private final String modelId;           // OpenRouter API中的模型标识
+&nbsp;    private final String displayName;       // 显示名称
+&nbsp;    private final String description;       // 模型描述
+&nbsp;    private final boolean supportsText;     // 是否支持文本
+&nbsp;    private final boolean supportsImage;    // 是否支持图片
+&nbsp;    private final double inputPrice;        // 输入价格 ($/M tokens)
+&nbsp;    private final double outputPrice;       // 输出价格 ($/M tokens)
+&nbsp;
+&nbsp;    AIModel(String modelId, String displayName, String description, 
+<b class="fc">&nbsp;            boolean supportsText, boolean supportsImage, double inputPrice, double outputPrice) {</b>
+<b class="fc">&nbsp;        this.modelId = modelId;</b>
+<b class="fc">&nbsp;        this.displayName = displayName;</b>
+<b class="fc">&nbsp;        this.description = description;</b>
+<b class="fc">&nbsp;        this.supportsText = supportsText;</b>
+<b class="fc">&nbsp;        this.supportsImage = supportsImage;</b>
+<b class="fc">&nbsp;        this.inputPrice = inputPrice;</b>
+<b class="fc">&nbsp;        this.outputPrice = outputPrice;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // Getters
+<b class="fc">&nbsp;    public String getModelId() { return modelId; }</b>
+<b class="fc">&nbsp;    public String getDisplayName() { return displayName; }</b>
+<b class="fc">&nbsp;    public String getDescription() { return description; }</b>
+<b class="fc">&nbsp;    public boolean isSupportsText() { return supportsText; }</b>
+<b class="fc">&nbsp;    public boolean isSupportsImage() { return supportsImage; }</b>
+<b class="fc">&nbsp;    public double getInputPrice() { return inputPrice; }</b>
+<b class="fc">&nbsp;    public double getOutputPrice() { return outputPrice; }</b>
+&nbsp;
+&nbsp;    // 根据modelId查找模型
+&nbsp;    public static AIModel fromModelId(String modelId) {
+<b class="pc">&nbsp;        for (AIModel model : values()) {</b>
+<b class="pc">&nbsp;            if (model.getModelId().equals(modelId)) {</b>
+<b class="fc">&nbsp;                return model;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return GPT_4_1_NANO; // 默认模型</b>
+&nbsp;    }
+&nbsp;
+&nbsp;//    // 获取支持图片的模型列表
+&nbsp;//    public static AIModel[] getImageSupportModels() {
+&nbsp;//        return java.util.Arrays.stream(values())
+&nbsp;//                .filter(AIModel::isSupportsImage)
+&nbsp;//                .toArray(AIModel[]::new);
+&nbsp;//    }
+&nbsp;//
+&nbsp;//    // 获取免费模型列表
+&nbsp;//    public static AIModel[] getFreeModels() {
+&nbsp;//        return java.util.Arrays.stream(values())
+&nbsp;//                .filter(m -&gt; m.getInputPrice() == 0.0)
+&nbsp;//                .toArray(AIModel[]::new);
+&nbsp;//    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-07-18 23:35</div>
+</div>
+</body>
+</html>

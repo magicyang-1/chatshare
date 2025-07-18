@@ -1,0 +1,215 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: ai-chat-backend
+  
+  # 数据库配置
+  datasource:
+    url: jdbc:mysql://47.102.196.198:3306/database?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${DB_USER:database}
+    password: ${DB_PASSWORD:wzm050826}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 300000
+      connection-timeout: 30000
+      max-lifetime: 1800000
+  
+  # JPA配置
+  jpa:
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: com.aiplatform.config.CustomNamingStrategy
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+        use_sql_comments: true
+        jdbc:
+          batch_size: 20
+          order_inserts: true
+          order_updates: true
+  
+  # Redis配置
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: 0
+      timeout: 3000
+      lettuce:
+        pool:
+          max-active: 8
+          max-wait: -1
+          max-idle: 8
+          min-idle: 0
+  
+  # 文件上传配置
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 100MB
+      enabled: true
+  
+  # 邮件配置
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+    properties:
+      hibernate:
+        force_lazy_loading: false
+
+# JWT配置
+jwt:
+  secret: ${JWT_SECRET:aiChatPlatformSecretKey123456789}
+  expiration: 86400000  # 24小时
+  refresh-expiration: 604800000  # 7天
+
+# 文件存储配置
+file:
+  upload:
+    path: ${FILE_UPLOAD_PATH:./uploads}
+    max-size: 50MB
+    allowed-types: jpg,jpeg,png,gif,pdf,doc,docx,txt
+
+# AI模型配置
+ai:
+  openrouter:
+    api-key: ${OPENAI_API_KEY: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}
+    base-url: ${OPENAI_API_URL:https://openrouter.ai/api/v1}
+    default-model: ${DEFAULT_TEXT_MODEL:openai/gpt-4.1-nano}
+    timeout: ${AI_TIMEOUT:30000}
+    max-tokens: ${AI_MAX_TOKENS:2000}
+    temperature: ${AI_TEMPERATURE:0.7}
+  # 阿里云DashScope配置
+  dashscope:
+    api-key: sk-035757578e9f4f38870ca5527a5f719c
+    enabled: ${DASHSCOPE_ENABLED:true}
+    timeout: ${DASHSCOPE_TIMEOUT:60000}
+    default-model: ${DASHSCOPE_DEFAULT_MODEL:wanx-v1}
+    default-size: ${DASHSCOPE_DEFAULT_SIZE:1024*1024}
+    default-style: ${DASHSCOPE_DEFAULT_STYLE:<auto>}
+  openai:
+    api-key: ${OPENAI_API_KEY:}
+    base-url: ${OPENAI_BASE_URL:https://api.openai.com}
+    models:
+      - gpt-3.5-turbo
+      - gpt-4
+      - gpt-4-turbo
+  anthropic:
+    api-key: ${ANTHROPIC_API_KEY:}
+    models:
+      - claude-3-sonnet
+      - claude-3-haiku
+  # 本地计算服务器配置
+  local:
+    enabled: ${LOCAL_AI_ENABLED:true}
+    base-url: ${LOCAL_AI_BASE_URL:http://202.120.38.3:55322}
+    api-key: ${LOCAL_AI_API_KEY:}  # 如果需要API密钥
+    timeout: ${LOCAL_AI_TIMEOUT:60000}  # 本地模型可能需要更长时间
+    max-tokens: ${LOCAL_AI_MAX_TOKENS:4000}
+    temperature: ${LOCAL_AI_TEMPERATURE:0.7}
+    models:
+      - name: "local-llama-13b"
+        display-name: "本地Llama 13B"
+        supports-images: false
+      - name: "local-qwen-14b"  
+        display-name: "本地Qwen 14B"
+        supports-images: false
+
+# 系统配置
+app:
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:3000,http://localhost:3001}
+  admin:
+    default-password: ${ADMIN_DEFAULT_PASSWORD:admin123456}
+  data:
+    retention:
+      default-days: 30
+      max-days: 365
+  rate-limit:
+    requests-per-minute: 60
+    requests-per-hour: 1000
+
+# 日志配置
+logging:
+  level:
+    com.aiplatform: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/ai-chat-backend.log
+
+# Swagger/OpenAPI配置
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    try-it-out-enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+
+# 开发环境配置
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+
+logging:
+  level:
+    root: INFO
+    com.aiplatform: DEBUG
+
+---
+# 生产环境配置
+spring:
+  config:
+    activate:
+      on-profile: prod
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+logging:
+  level:
+    root: WARN
+    com.aiplatform: INFO 
