@@ -90,7 +90,7 @@ public class ImageGenerationController {
                 Map<String, Object> response = new HashMap<>();
                 response.put("success", true);
                 response.put("message", "图片生成成功");
-                response.put("imageUrl", "http://localhost:8080/api/files/" + attachment.getFileName());
+                response.put("imageUrl", "http://60.204.247.252/api/files/" + attachment.getFileName());
                 response.put("messageId", message.getId());
                 response.put("attachmentId", attachment.getId());
                 
