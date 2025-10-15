@@ -25,6 +25,7 @@ jobs:
 
       # 3️⃣ 使用 Maven 构建项目
       - name: Build with Maven
+        working-directory: FinalRelease/server/java-backend
         run: mvn clean package -DskipTests=true
 
       # 4️⃣ 上传打包结果作为 artifact（可选）
