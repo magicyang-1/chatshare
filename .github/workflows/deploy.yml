@@ -58,3 +58,4 @@ jobs:
             echo "Starting new Spring Boot app..."
             nohup java -jar /root/app/ai-chat-backend.jar > /root/app/server.log 2>&1 &
             echo "Deployment completed!"
+            exit 0     # ✅ 防止“143 terminated”误判
