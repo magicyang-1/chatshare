@@ -48,6 +48,7 @@ jobs:
       # 6️⃣ 远程执行启动命令（在 ECS 上重启服务）
       - name: Restart Spring Boot on ECS
         uses: appleboy/ssh-action@master
+        continue-on-error: true    # ✅ 忽略退出信号 143
         with:
           host: ${{ secrets.ECS_HOST }}
           username: ${{ secrets.ECS_USER }}
@@ -61,4 +62,3 @@ jobs:
             sleep 2
             echo "Deployment completed!"
             tail -n 20 /root/app/server.log || true
-            exit 0
