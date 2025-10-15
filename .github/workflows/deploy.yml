@@ -42,7 +42,7 @@ jobs:
           host: ${{ secrets.ECS_HOST }}
           username: ${{ secrets.ECS_USER }}
           password: ${{ secrets.ECS_PASSWORD }}
-          source: "FinalRelease/server/java-backend/target/*.jar"
+          source: FinalRelease/server/java-backend/target/*.jar
           target: "/root/app/"
 
       # 6️⃣ 远程执行启动命令（在 ECS 上重启服务）
