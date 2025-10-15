@@ -45,6 +45,14 @@ jobs:
           source: FinalRelease/server/java-backend/target/*.jar
           target: /root/app/
 
+      - name: Verify upload
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.ECS_HOST }}
+          username: ${{ secrets.ECS_USER }}
+          password: ${{ secrets.ECS_PASSWORD }}
+          script: ls -lh /root/app
+
       # 6️⃣ 远程执行启动命令（在 ECS 上重启服务）
       - name: Restart Spring Boot on ECS
         uses: appleboy/ssh-action@master
