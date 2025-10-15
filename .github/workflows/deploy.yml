@@ -56,7 +56,6 @@ jobs:
       # 6️⃣ 远程执行启动命令（在 ECS 上重启服务）
       - name: Restart Spring Boot on ECS
         uses: appleboy/ssh-action@master
-        continue-on-error: true
         with:
           host: ${{ secrets.ECS_HOST }}
           username: ${{ secrets.ECS_USER }}
@@ -66,9 +65,15 @@ jobs:
             pkill -f "ai-chat-backend" || true
             echo "Starting new Spring Boot app..."
             cd /root/app/FinalRelease/server/java-backend/target
+            mkdir -p /root/app
+            touch /root/app/server.log
+            
             JAR_FILE=$(ls ai-chat-backend*.jar | head -n 1)
-            echo "Detected jar: $JAR_FILE"
-            setsid nohup java -jar "$JAR_FILE" > /root/app/server.log 2>&1 </dev/null &
+            echo "Launching $JAR_FILE ..."
+            # ✅ 后台独立运行，不被 SSH session 终止
+            nohup setsid java -jar "$JAR_FILE" > /root/app/server.log 2>&1 &
+            
             sleep 3
             echo "Deployment completed!"
-            tail -n 20 /root/app/server.log || true
+            ps -ef | grep ai-chat || true
+            tail -n 15 /root/app/server.log || true
