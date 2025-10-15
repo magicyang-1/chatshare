@@ -63,7 +63,7 @@ jobs:
           password: ${{ secrets.ECS_PASSWORD }}
           script: |
             echo "Stopping old process..."
-            pkill -f "ai-chat-backend.jar" || true
+            pkill -f "ai-chat-backend" || true
             echo "Starting new Spring Boot app..."
             cd /root/app/FinalRelease/server/java-backend/target
             setsid nohup java -jar ai-chat-backend-1.0.0.jar > /root/app/server.log 2>&1 </dev/null &
