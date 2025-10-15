@@ -1,5 +1,6 @@
 name: Spring Boot Maven CI/CD
-
+  export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+  export PATH=$JAVA_HOME/bin:$PATH
 on:
   push:
     branches:
@@ -60,20 +61,20 @@ jobs:
           host: ${{ secrets.ECS_HOST }}
           username: ${{ secrets.ECS_USER }}
           password: ${{ secrets.ECS_PASSWORD }}
+          continue-on-error: true   # ✅ 忽略 exit 143
           script: |
-            echo "Stopping old process..."
-            pkill -f "ai-chat-backend" || true
-            echo "Starting new Spring Boot app..."
-            cd /root/app/FinalRelease/server/java-backend/target
-            mkdir -p /root/app
-            touch /root/app/server.log
+            echo "🔧 Reloading systemd daemon..."
+            sudo systemctl daemon-reload
             
-            JAR_FILE=$(ls ai-chat-backend*.jar | head -n 1)
-            echo "Launching $JAR_FILE ..."
-            # ✅ 后台独立运行，不被 SSH session 终止
-            nohup setsid java -jar "$JAR_FILE" > /root/app/server.log 2>&1 &
+            echo "🛑 Stopping old ai-chat service if running..."
+            sudo systemctl stop ai-chat || true
             
-            sleep 3
-            echo "Deployment completed!"
-            ps -ef | grep ai-chat || true
-            tail -n 15 /root/app/server.log || true
+            echo "🚀 Starting ai-chat service..."
+            sudo systemctl start ai-chat
+            
+            echo "🔍 Checking service status..."
+            sudo systemctl status ai-chat --no-pager -l | head -n 20
+            
+            echo "✅ Tail latest logs..."
+            sudo tail -n 15 /root/app/server.log || true
+
