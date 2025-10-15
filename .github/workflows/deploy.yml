@@ -57,8 +57,8 @@ jobs:
             pkill -f "ai-chat-backend.jar" || true
             echo "Starting new Spring Boot app..."
             cd /root/app
-            nohup java -jar /root/app/ai-chat-backend.jar > /root/app/server.log 2>&1 &
-            disown    # ✅ 脱离当前 SSH session
+            setsid nohup java -jar /root/app/ai-chat-backend.jar > /root/app/server.log 2>&1 </dev/null &
             sleep 2
             echo "Deployment completed!"
+            tail -n 20 /root/app/server.log || true
             exit 0
