@@ -50,3 +50,14 @@ jobs:
           password: ${{ secrets.ECS_PASSWORD }}
           source: ./deploy_jar/*.jar
           target: /root/app/FinalRelease/server/java-backend/target/
+      - name: Restart ai-chat service
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.ECS_HOST }}
+          username: ${{ secrets.ECS_USER }}
+          password: ${{ secrets.ECS_PASSWORD }}
+          script: |
+            echo "🔁 Restarting ai-chat service..."
+            sudo systemctl daemon-reload
+            sudo systemctl restart ai-chat
+            sudo systemctl status ai-chat --no-pager -l | head -n 20
