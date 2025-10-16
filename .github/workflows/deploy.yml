@@ -31,7 +31,7 @@ jobs:
       # 4️⃣ 打包构建（仅测试通过后才执行）
       - name: Build JAR Package
         working-directory: FinalRelease/server/java-backend
-        run: mvn package -DskipTests=false
+        run: mvn package -DskipTests=true
 
       # 5️⃣ 上传构建产物（可选）
       - name: Upload artifact
