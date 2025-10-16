@@ -2,45 +2,36 @@ name: Spring Boot Maven CI/CD
 
 on:
   push:
-    branches:
-      - main        # 每次推送 main 分支触发部署
-  workflow_dispatch:  # 手动触发
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  build-and-deploy:
+  # === 1️⃣ CI阶段：构建+测试 ===
+  build-test:
     runs-on: ubuntu-latest
-
     steps:
-      # 1️⃣ 检出代码
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      # 2️⃣ 设置 JDK 17 环境
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
 
-      # 3️⃣ 运行单元测试（CI 部分）
       - name: Run Unit Tests
         working-directory: FinalRelease/server/java-backend
         run: mvn clean test
 
-      # 4️⃣ 打包构建（仅测试通过后才执行）
-      - name: Build JAR Package
+      - name: Package
         working-directory: FinalRelease/server/java-backend
         run: mvn package -DskipTests=true
 
-      # 5️⃣ 上传构建产物（可选）
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ai-chat-backend
-          path: FinalRelease/server/java-backend/target/*.jar
-
-      # 6️⃣ 将 JAR 上传到 ECS
+  # === 2️⃣ CD阶段：仅在main成功后触发 ===
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-test    # ✅ 依赖上一个job成功
+    if: github.ref == 'refs/heads/main'   # ✅ 只在main分支执行部署
+    steps:
       - name: Deploy to ECS
         uses: appleboy/scp-action@master
         with:
@@ -50,35 +41,14 @@ jobs:
           source: FinalRelease/server/java-backend/target/*.jar
           target: /root/app/FinalRelease/server/java-backend/target/
 
-      # 7️⃣ 验证上传结果
-      - name: Verify upload
+      - name: Restart Spring Boot
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.ECS_HOST }}
           username: ${{ secrets.ECS_USER }}
           password: ${{ secrets.ECS_PASSWORD }}
-          script: ls -lh /root/app/FinalRelease/server/java-backend/target/
-
-      # 8️⃣ 重启 Spring Boot 服务（CD 部分）
-      - name: Restart Spring Boot on ECS
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.ECS_HOST }}
-          username: ${{ secrets.ECS_USER }}
-          password: ${{ secrets.ECS_PASSWORD }}
-          continue-on-error: true   # ✅ 防止因 exit 143 报错
           script: |
-            echo "🔧 Reloading systemd daemon..."
             sudo systemctl daemon-reload
-
-            echo "🛑 Stopping old ai-chat service if running..."
             sudo systemctl stop ai-chat || true
-
-            echo "🚀 Starting ai-chat service..."
             sudo systemctl start ai-chat
-
-            echo "🔍 Checking service status..."
             sudo systemctl status ai-chat --no-pager -l | head -n 20
-
-            echo "✅ Tail latest logs..."
-            sudo tail -n 15 /root/app/server.log || true
