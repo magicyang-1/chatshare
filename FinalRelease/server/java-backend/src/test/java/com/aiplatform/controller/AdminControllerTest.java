@@ -82,7 +82,7 @@ public class AdminControllerTest {
                 .authorizeHttpRequests(auth -> auth
                     .anyRequest().permitAll()  // 允许所有请求
                 );
-//            assert False;
+            assert False;
             return http.build();
         }
     }
