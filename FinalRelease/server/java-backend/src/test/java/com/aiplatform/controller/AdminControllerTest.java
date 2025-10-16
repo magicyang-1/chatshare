@@ -59,6 +59,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     "spring.jpa.show-sql=false"
 })
 public class AdminControllerTest {
+    //
 
     @Configuration
     @EnableAutoConfiguration(exclude = {
