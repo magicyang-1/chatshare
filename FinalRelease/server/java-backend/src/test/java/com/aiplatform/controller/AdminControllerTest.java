@@ -145,6 +145,7 @@ public class AdminControllerTest {
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content.length()").value(2))
                 .andExpect(jsonPath("$.totalElements").value(2));
+        assert false;
         
         System.out.println("✅ 获取用户列表成功测试通过");
     }
